@@ -2,6 +2,13 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs').promises;
 
+try {
+    require('electron-reloader')(module, {
+        debug: true,
+        watchRenderer: true
+    });
+} catch (_) { console.log('Error'); }
+
 function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 1200,

@@ -40,7 +40,7 @@
         position: relative;
       }
 
-      .sidebar-icon.chat {
+      .sidebar-icon.voice {
         background-color: #fff7e6;
         color: #ffc107;
         border: 2px solid #fff0cc;
@@ -62,12 +62,6 @@
         background-color: #e6e6ff;
         color: #6610f2;
         border: 2px solid #ccccff;
-      }
-
-      .sidebar-icon.voice {
-        background-color: #fff7e6;
-        color: #ffc107;
-        border: 2px solid #fff0cc;
       }
 
       .voice-dropdown {
@@ -107,78 +101,12 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-      }
-
-      .top-bar {
-        padding: 10px 20px;
-        border-bottom: 1px solid #e9ecef;
-      }
-
-      .models-button {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 12px;
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 6px;
-        cursor: pointer;
-        color: #212529;
-        font-size: 14px;
-      }
-
-      .models-button:hover {
-        background-color: #e9ecef;
-      }
-
-      .models-directory {
-        margin-top: 10px;
-        padding: 10px;
-        background-color: #f8f9fa;
-        border-radius: 6px;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .directory-path {
-        color: #6c757d;
-        font-family: monospace;
-      }
-
-      .nav-list {
-        padding: 20px;
-      }
-
-      .nav-item {
-        padding: 10px;
-        margin-bottom: 5px;
-        border-radius: 6px;
-        cursor: pointer;
-      }
-
-      .nav-item.active {
-        background-color: #0d6efd;
-        color: white;
-      }
-
-      .nav-item:not(.active):hover {
-        background-color: #e9ecef;
-      }
-
-      .more-options {
-        cursor: pointer;
-        padding: 5px;
-        border-radius: 4px;
-      }
-
-      .more-options:hover {
-        background-color: #e9ecef;
+        background-color: #ffffff;
       }
 
       .voice-content {
-        padding: 20px;
-        max-width: 1200px;
+        padding: 40px;
+        max-width: 900px;
         margin: 0 auto;
         display: none;
       }
@@ -188,12 +116,13 @@
       }
 
       .voice-header {
-        margin-bottom: 24px;
+        margin-bottom: 32px;
       }
 
       .voice-header h1 {
         font-size: 24px;
         margin-bottom: 12px;
+        color: #1a1a1a;
       }
 
       .voice-header p {
@@ -204,8 +133,8 @@
 
       .voice-actions {
         display: flex;
-        gap: 16px;
-        margin: 24px 0;
+        gap: 12px;
+        margin: 32px 0;
       }
 
       .action-button {
@@ -226,100 +155,18 @@
         background: #e9ecef;
       }
 
-      .language-selector {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        cursor: pointer;
-      }
-
-      .language-selector img {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-      }
-
-      .voice-selector {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 24px;
-      }
-
-      .character-count {
-        color: #6c757d;
-        font-size: 14px;
-        margin-left: auto;
-      }
-
-      .play-button {
-        background: #0d6efd;
-        color: white;
-      }
-
-      .play-button:hover {
-        background: #0b5ed7;
-      }
-
-      .effect-controls {
-        margin: 20px 0;
-        padding: 20px;
-        background: #f8f9fa;
-        border-radius: 8px;
-      }
-
-      .effect-slider {
-        margin-bottom: 16px;
-      }
-
-      .effect-slider label {
-        display: block;
-        margin-bottom: 8px;
-        color: #212529;
-      }
-
-      .effect-slider input {
-        width: 100%;
-      }
-
-      .language-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 16px;
-        margin: 20px 0;
-      }
-
-      .language-item {
-        padding: 12px;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-      }
-
-      .language-item:hover {
-        background: #f8f9fa;
-      }
-
-      .sample-list {
-        margin: 20px 0;
-        padding: 16px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        min-height: 200px;
-      }
-
       .input-container {
         background: white;
-        border: 1px solid #e9ecef;
+        border: 1px solid #e0e0e0;
         border-radius: 12px;
-        padding: 20px;
-        margin-top: 20px;
+        padding: 24px;
+        margin-top: 24px;
+        position: relative;
+      }
+
+      .input-container:hover {
+        transform: none;
+        box-shadow: none;
       }
 
       .selector-row {
@@ -334,52 +181,21 @@
         align-items: center;
         gap: 8px;
         padding: 8px 16px;
-        border: 1px solid #dee2e6;
+        border: 1px solid #e0e0e0;
         border-radius: 8px;
         cursor: pointer;
         background: white;
+        font-size: 14px;
+        position: relative;
+        min-width: 120px;
+        height: 40px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        transition: all 0.2s ease;
       }
 
       .selector:hover {
-        background: #f8f9fa;
-      }
-
-      .voice-avatar {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        overflow: hidden;
-      }
-
-      .voice-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .dropdown-arrow {
-        color: #6c757d;
-        margin-left: 4px;
-      }
-
-      .text-input {
-        margin: 16px 0;
-      }
-
-      .text-input textarea {
-        width: 100%;
-        min-height: 200px;
-        padding: 16px;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        font-size: 16px;
-        line-height: 1.5;
-        resize: vertical;
-      }
-
-      .text-input textarea:focus {
-        outline: none;
-        border-color: #0d6efd;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        transform: translateY(-1px);
       }
 
       .character-count {
@@ -387,13 +203,210 @@
         color: #6c757d;
         font-size: 14px;
       }
+
+      .play-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 32px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+        color: white;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+      }
+
+      .play-button:hover {
+        background: linear-gradient(135deg, #4338ca 0%, #2563eb 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+      }
+
+      .play-button:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 2px rgba(59, 130, 246, 0.2);
+      }
+
+      .play-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 8px;
+        background: linear-gradient(135deg, rgba(79, 70, 229, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+        filter: blur(8px);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        z-index: -1;
+      }
+
+      .play-button:hover::before {
+        opacity: 1;
+      }
+
+      .flag-container {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .flag-icon {
+        width: 24px;
+        height: 24px;
+        object-fit: cover;
+      }
+
+      .language-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        margin-top: 8px;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        display: none;
+        z-index: 1000;
+        padding: 8px 0;
+      }
+
+      .selector:hover .language-dropdown {
+        display: block;
+        animation: dropdownFade 0.2s ease;
+      }
+
+      @keyframes dropdownFade {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .language-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .language-option:hover {
+        background-color: #f5f5f5;
+      }
+
+      .dropdown-arrow {
+        margin-left: auto;
+        color: #666;
+        flex-shrink: 0;
+      }
+
+      .voice-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f0f0f0;
+      }
+
+      .avatar-icon {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .voice-model-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        margin-top: 8px;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        display: none;
+        z-index: 1000;
+        padding: 8px 0;
+        min-width: 180px;
+      }
+
+      .voice-model-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .voice-model-option:hover {
+        background-color: #f5f5f5;
+      }
+
+      .selector.voice-select:hover .voice-model-dropdown {
+        display: block;
+        animation: dropdownFade 0.2s ease;
+      }
+
+      /* Update text input styles */
+      .text-input {
+        width: 100%;
+        min-height: 300px;  /* Make text box taller */
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 15px;
+        line-height: 1.6;
+        resize: vertical;
+        background-color: #ffffff;
+        transition: background-color 0.2s ease;
+        margin-bottom: 16px;  /* Add space between text box and button */
+      }
+
+      .text-input:focus {
+        outline: none;
+        border-color: #e0e0e0;
+        background-color: #f8f9fa;
+      }
+
+      /* Update play button container */
+      .button-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .play-button {
+        margin-left: 0;  /* Remove auto margin */
+        /* ... rest of play button styles ... */
+      }
     </style>
   </head>
   <body>
     <div class="sidebar">
       <div class="sidebar-icon voice">🎙️
         <div class="voice-dropdown">
-          <div class="voice-option">🗣️ Text to Speech</div>
+          <div class="voice-option">🎙️ Text to Speech</div>
           <div class="voice-option">🔊 Text to SFX</div>
           <div class="voice-option">🎤 Voice Changer</div>
           <div class="voice-option">🎬 Dubbing</div>
@@ -409,7 +422,7 @@
       <div class="sidebar-icon folder">📂
         <div class="voice-dropdown">
           <div class="voice-option">📁 Browse Files</div>
-          <div class="voice-option">💾 Save Location</div>
+          <div class="voice-option">📂 Save Location</div>
         </div>
       </div>
       <div class="sidebar-icon search">🔎
@@ -441,27 +454,83 @@
         <div class="input-container">
           <div class="selector-row">
             <div class="selector language-select">
-              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAABmJLR0QA/wD/AP+gvaeTAAAAnUlEQVRIie3TMQrCQBCF4W+DhYKFYGFhYSHYeQYLT+cNxFN4AA8gCNYWFhYWYiEIFsJYbCIIks3uZCcB8z4Y2GF/ZpdNCCGEkC0PnIEHUGT0FMAVeAInoIzSY9pnwPVN9wauQD3S5xqwAWqgHSm9AXWqr4EtcEvsnYEyNxjgDOyBFfD+0Zv1jH/B2cH/Bc4KLnJvJxf7qeC5/c8QQgjhD7wAL/ZI2Pz+7D0AAAAASUVORK5CYII=" alt="English">
+              <div class="flag-container">
+                <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/us.svg" alt="English" class="flag-icon">
+              </div>
               <span>English</span>
               <span class="dropdown-arrow">▼</span>
+              <div class="language-dropdown">
+                <div class="language-option">
+                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/us.svg" alt="English" class="flag-icon">
+                  <span>English</span>
+                </div>
+                <div class="language-option">
+                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/es.svg" alt="Spanish" class="flag-icon">
+                  <span>Spanish</span>
+                </div>
+                <div class="language-option">
+                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/fr.svg" alt="French" class="flag-icon">
+                  <span>French</span>
+                </div>
+                <div class="language-option">
+                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/de.svg" alt="German" class="flag-icon">
+                  <span>German</span>
+                </div>
+                <div class="language-option">
+                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/it.svg" alt="Italian" class="flag-icon">
+                  <span>Italian</span>
+                </div>
+              </div>
             </div>
             <div class="selector voice-select">
               <div class="voice-avatar">
-                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABmJLR0QA/wD/AP+gvaeTAAAFBklEQVRoge2ZW2gcVRjH/2c22SQ1aZLNbppk89Db2mbTGFBjDFqLjcYHwVCsCgXBFnyoCL5IwQcFQalg44MPtvSlICIIKoiKtmK1rWBbk9ZGaZu0IY1p7s0mMdndJDuzM+fMzPFhk3R3M7M7s8klFH9w2Nk5Z777m++c75w5H8B/HGQpF67mC0cQAkQRhBCwLAuGYVz8jEQisGwHtm2DpmmIogiGYUBRFEiSBEmSwLKXd5mmaQSDQZTLZTiOA9M0YZomTNMEwzAQBAEkSYIkyWuCpmm4rotEIgGGYaDrOkqlEnRdhyAIEEURkUgEsizD7/df/O1EEXE6lUImk4FhGHAcB7Ztn68sCOB5HgzDgOd5hEIh+Hw+OI4Dy7JQKpVQKpXgui4cx4EgCLAsC4qiQNM0KIq6pGPHcUBRFARBgCAIoGkaFEWBoiiQNM2KIq6pL0Ypmga/34+GhgbU1dUhEAiAoig4joNCoYBsNotisQiWZSHLMsLhMHieh+u6cF0XgiAgFAohHA6jpqYGPM/DdV0sLi4im83CNA2wLAtZlhEOh8HzPJbqoCg4jgNRFCEIAliWhSAIYGgaLoClfB61tbUXhbgURYHjOLBt+6JEruuCJEmwLAuWZcEwDBiG+Q4nSRKO48C27YvhhSAIoGkakiTB7/dDlmVIkgSO42DbNgqFAvL5PCzLgiAIEEURoihCFMVLq5AgQBAEiKJ4SXyCIMCyLFiWBcMwKBaLMAwDBEHA4/EgEokgHA5fUMpd10WxWEShUEClUgFJkvB4PAiFQggEAhAEAY7joFgsIpvNQtd1uK4Ln8+HSCSCQCAAiqKuSNyO48A0TZimCcuyYFkWHMeBbdtgGAYsy4KmaZAkCZqmwXEcUqkUkskk0uk0bNsGwzCQJAnBYBDRaBSxWAzBYBA8z6NSqSCdTqNQKMA0TbiuC5IkwTAMGIYBRVFgGAY0TYMkSVAUBZqmQZIkKIoCTdMgSRIURYGmaZAkCYZhQNP0xYRbKBRQLpdh2zYYhoHX60UwGEQkEkE4HL5Y8ZYFHDx4EKOjozh06BCePPgkHtj3AMbGxpBMJTGXmEM2l0W5XIZlWaAoCjzPQ5ZlhEIhRKNRNDY2IhqPorujG7t27UJXV9f/3XZXVxeam5sxPDyMU6dO4fTp0xgdHcXk5CSSySSymSyKxSJs2wZBEBAEAZIkIRAIIBwOo6GhAS0tLWhvb0d7ezva29vR29uL3t5etLW1IR6PI5PJZuj9+/cTR44cIV9+6WXqfOI8mUqnMDE5gT/P/ImJiQnMzMwgm82iWCzCsiyQJAlRFBEIBBCJRFBXV4fm5mZ0dXWhp6cH27dvR39/P7q7u9HR0YFwOIyFhQWMj49jbGwMY2NjOHPmDKamppBKpZDL5VCpVFAul+E4DgRBgCRJ8Hq9CAQCiMViCIfDaG1tRUdHB/r6+jAwMIAtW7Zg06ZNiMVi4Hn+3+v/NfynAQD4C9j5qVx6H7FbAAAAAElFTkSuQmCC" alt="Brian">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=brian" alt="Brian" class="avatar-icon">
               </div>
               <span>BRIAN</span>
               <span class="dropdown-arrow">▼</span>
+              <div class="voice-model-dropdown">
+                <div class="voice-model-option">
+                  <div class="voice-avatar">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=brian" alt="Brian" class="avatar-icon">
+                  </div>
+                  <span>BRIAN</span>
+                </div>
+                <div class="voice-model-option">
+                  <div class="voice-avatar">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=alice" alt="Alice" class="avatar-icon">
+                  </div>
+                  <span>ALICE</span>
+                </div>
+                <div class="voice-model-option">
+                  <div class="voice-avatar">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=bill" alt="Bill" class="avatar-icon">
+                  </div>
+                  <span>BILL</span>
+                </div>
+                <div class="voice-model-option">
+                  <div class="voice-avatar">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=callum" alt="Callum" class="avatar-icon">
+                  </div>
+                  <span>CALLUM</span>
+                </div>
+                <div class="voice-model-option">
+                  <div class="voice-avatar">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=charlie" alt="Charlie" class="avatar-icon">
+                  </div>
+                  <span>CHARLIE</span>
+                </div>
+              </div>
             </div>
-            <span class="character-count">156/500</span>
+            <span class="character-count">0/500</span>
           </div>
-
-          <div class="text-input">
-            <textarea placeholder="Type something..."></textarea>
+          
+          <textarea class="text-input" id="text-input" placeholder="Type something..."></textarea>
+          
+          <div class="button-container">
+            <button class="play-button">
+              <span>▶</span> Play
+            </button>
           </div>
-
-          <button class="action-button play-button">
-            <span>▶</span> Play
-          </button>
         </div>
       </div>
 

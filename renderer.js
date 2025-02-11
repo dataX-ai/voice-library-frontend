@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // Remove the models-related code since we're not using it
-
     // Track current active dropdown
     let activeDropdown = null;
 
@@ -78,16 +76,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector('.text-to-speech').classList.add('active');
 
     // Handle character count
-    const textarea = document.querySelector('.text-input textarea');
+    const textarea = document.getElementById('text-input');
     const charCount = document.querySelector('.character-count');
 
-    textarea?.addEventListener('input', function () {
-        const length = this.value.length;
-        charCount.textContent = `${length}/500`;
+    if (textarea && charCount) {
+        textarea.addEventListener('input', function () {
+            const length = this.value.length;
+            charCount.textContent = `${length}/500`;
 
-        // Optional: Disable input if over limit
-        if (length > 500) {
-            this.value = this.value.substring(0, 500);
-        }
+            // Optional: Disable input if over limit
+            if (length > 500) {
+                this.value = this.value.substring(0, 500);
+            }
+        });
+    }
+
+    // Add this to your existing DOMContentLoaded event listener
+    document.querySelectorAll('.language-option').forEach(option => {
+        option.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const flagImg = this.querySelector('img').cloneNode(true);
+            const languageText = this.querySelector('span').textContent;
+
+            const selector = this.closest('.language-select');
+            selector.querySelector('.flag-container img').replaceWith(flagImg);
+            selector.querySelector('span').textContent = languageText;
+        });
+    });
+
+    // Add this to your existing code
+    document.querySelectorAll('.voice-model-option').forEach(option => {
+        option.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const avatarImg = this.querySelector('.avatar-icon').cloneNode(true);
+            const voiceName = this.querySelector('span').textContent;
+
+            const selector = this.closest('.voice-select');
+            selector.querySelector('.voice-avatar img').replaceWith(avatarImg);
+            selector.querySelector('span').textContent = voiceName;
+        });
     });
 }); 
