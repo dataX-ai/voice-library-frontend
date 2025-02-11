@@ -102,12 +102,13 @@
         display: flex;
         flex-direction: column;
         background-color: #ffffff;
+        padding-left: 0;
       }
 
       .voice-content {
-        padding: 40px;
-        max-width: 900px;
-        margin: 0 auto;
+        padding: 40px 40px 40px 100px;
+        max-width: 1200px;
+        margin: 0;
         display: none;
       }
 
@@ -208,7 +209,7 @@
         background: white;
         font-size: 14px;
         position: relative;
-        min-width: 120px;
+        min-width: 180px;
         height: 40px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         transition: all 0.2s ease;
@@ -223,6 +224,8 @@
         margin-left: auto;
         color: #6c757d;
         font-size: 14px;
+        min-width: 60px;
+        text-align: right;
       }
 
       .play-button {
@@ -392,7 +395,7 @@
       /* Update text input styles */
       .text-input {
         width: 100%;
-        min-height: 300px;  /* Make text box taller */
+        min-height: 300px;
         padding: 16px;
         border: 1px solid #e0e0e0;
         border-radius: 8px;
@@ -401,7 +404,7 @@
         resize: vertical;
         background-color: #ffffff;
         transition: background-color 0.2s ease;
-        margin-bottom: 16px;  /* Add space between text box and button */
+        margin-bottom: 16px;
       }
 
       .text-input:focus {
@@ -418,8 +421,110 @@
       }
 
       .play-button {
-        margin-left: 0;  /* Remove auto margin */
+        margin-left: 0;
         /* ... rest of play button styles ... */
+      }
+
+      .controls-section {
+        margin-top: 8px;
+      }
+
+      .effect-controls {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 32px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+      }
+
+      .effect-slider {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .effect-slider label {
+        font-size: 14px;
+        color: #374151;
+        font-weight: 500;
+      }
+
+      .effect-slider input[type="range"] {
+        width: 100%;
+        height: 4px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        appearance: none;
+        outline: none;
+      }
+
+      .effect-slider input[type="range"]::-webkit-slider-thumb {
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        background: #4f46e5;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .effect-slider input[type="range"]::-webkit-slider-thumb:hover {
+        background: #4338ca;
+      }
+
+      .slider-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .slider-value {
+        font-size: 14px;
+        color: #4f46e5;
+        font-weight: 500;
+      }
+
+      .selected-file {
+        margin-bottom: 32px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        width: 100%;
+      }
+
+      .selected-file span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #374151;
+      }
+
+      .selected-file audio {
+        margin-top: 16px;
+        width: 100%;
+        height: 36px;
+      }
+
+      /* Style the audio player */
+      .selected-file audio::-webkit-media-controls-panel {
+        background: #ffffff;
+        border-radius: 8px;
+      }
+
+      .selected-file audio::-webkit-media-controls-play-button {
+        background-color: #4f46e5;
+        border-radius: 50%;
+      }
+
+      /* Update button container spacing */
+      .button-container {
+        margin-top: 8px;
       }
     </style>
   </head>
@@ -446,7 +551,7 @@
           <div class="voice-option">📂 Save Location</div>
         </div>
       </div>
-      <div class="sidebar-icon search">🔎
+      <div class="sidebar-icon search">
         <div class="voice-dropdown">
           <div class="voice-option">🔎 Search Models</div>
           <div class="voice-option">📊 Search History</div>
@@ -563,27 +668,56 @@
         
         <div class="voice-actions">
           <button class="action-button">
-            <span>🔔</span> CREATE NOTIFICATION
+            <span>🔔</span> Create Notification
           </button>
           <button class="action-button">
-            <span>🎮</span> GAME SOUND
+            <span>🎮</span> Game Sound
           </button>
           <button class="action-button">
-            <span>🎵</span> MUSICAL EFFECT
+            <span>🎵</span> Musical Effect
           </button>
         </div>
 
-        <div class="sfx-selector">
-          <div class="language-selector">
-            <span>Effect Type</span>
-            <span>▼</span>
+        <div class="input-container">
+          <div class="selector-row">
+            <div class="selector effect-select">
+              <div class="voice-avatar">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=effect" alt="Effect" class="avatar-icon">
+              </div>
+              <span>Notification</span>
+              <span class="dropdown-arrow">▼</span>
+              <div class="voice-model-dropdown">
+                <div class="voice-model-option">
+                  <div class="voice-avatar">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=notification" alt="Notification" class="avatar-icon">
+                  </div>
+                  <span>Notification</span>
+                </div>
+                <div class="voice-model-option">
+                  <div class="voice-avatar">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=alert" alt="Alert" class="avatar-icon">
+                  </div>
+                  <span>Alert</span>
+                </div>
+                <div class="voice-model-option">
+                  <div class="voice-avatar">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=game" alt="Game Effect" class="avatar-icon">
+                  </div>
+                  <span>Game Effect</span>
+                </div>
+              </div>
+            </div>
+            <span class="character-count">0/500</span>
           </div>
-          <span class="character-count">0/200</span>
+          
+          <textarea class="text-input" id="sfx-input" placeholder="Type something..."></textarea>
+          
+          <div class="button-container">
+            <button class="play-button">
+              <span>▶</span> Generate SFX
+            </button>
+          </div>
         </div>
-
-        <button class="action-button play-button">
-          <span>▶</span> Generate SFX
-        </button>
       </div>
 
       <div class="voice-content voice-changer">
@@ -594,27 +728,40 @@
 
         <div class="voice-actions">
           <button class="action-button">
-            <span>🎤</span> RECORD VOICE
+            <span>🎤</span> Record Voice
           </button>
           <button class="action-button">
-            <span>📁</span> UPLOAD AUDIO
+            <span>📁</span> Upload Audio
           </button>
         </div>
 
-        <div class="effect-controls">
-          <div class="effect-slider">
-            <label>Pitch</label>
-            <input type="range" min="0" max="100" value="50">
-          </div>
-          <div class="effect-slider">
-            <label>Speed</label>
-            <input type="range" min="0" max="100" value="50">
+        <div class="input-container">
+          <!-- File info will appear here when uploaded -->
+          <div class="controls-section">
+            <div class="effect-controls">
+              <div class="effect-slider">
+                <div class="slider-header">
+                  <label>Pitch</label>
+                  <span class="slider-value">50</span>
+                </div>
+                <input type="range" min="0" max="100" value="50" id="pitch-slider">
+              </div>
+              <div class="effect-slider">
+                <div class="slider-header">
+                  <label>Speed</label>
+                  <span class="slider-value">50</span>
+                </div>
+                <input type="range" min="0" max="100" value="50" id="speed-slider">
+              </div>
+            </div>
+            
+            <div class="button-container">
+              <button class="play-button">
+                <span>▶</span> Preview
+              </button>
+            </div>
           </div>
         </div>
-
-        <button class="action-button play-button">
-          <span>▶</span> Preview
-        </button>
       </div>
 
       <div class="voice-content dubbing">

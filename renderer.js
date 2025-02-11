@@ -75,21 +75,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Show Text to Speech content by default
     document.querySelector('.text-to-speech').classList.add('active');
 
-    // Handle character count
-    const textarea = document.getElementById('text-input');
-    const charCount = document.querySelector('.character-count');
+    // Handle character count for both text-to-speech and text-to-sfx textareas
+    const textInputs = {
+        'text-input': document.querySelector('.text-to-speech .character-count'),
+        'sfx-input': document.querySelector('.text-to-sfx .character-count')
+    };
 
-    if (textarea && charCount) {
-        textarea.addEventListener('input', function () {
-            const length = this.value.length;
-            charCount.textContent = `${length}/500`;
+    Object.entries(textInputs).forEach(([inputId, counter]) => {
+        const textarea = document.getElementById(inputId);
+        if (textarea && counter) {
+            textarea.addEventListener('input', function () {
+                const length = this.value.length;
+                counter.textContent = `${length}/500`;
 
-            // Optional: Disable input if over limit
-            if (length > 500) {
-                this.value = this.value.substring(0, 500);
-            }
-        });
-    }
+                // Optional: Disable input if over limit
+                if (length > 500) {
+                    this.value = this.value.substring(0, 500);
+                }
+            });
+        }
+    });
 
     // Add this to your existing DOMContentLoaded event listener
     document.querySelectorAll('.language-option').forEach(option => {
@@ -144,4 +149,126 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     });
+
+    // Handle slider value updates
+    document.querySelectorAll('.effect-slider input[type="range"]').forEach(slider => {
+        const valueDisplay = slider.parentElement.querySelector('.slider-value');
+
+        slider.addEventListener('input', function () {
+            valueDisplay.textContent = this.value;
+        });
+    });
+
+    // Update the file upload handling
+    const uploadButton = document.querySelector('.voice-changer .action-button:nth-child(2)');
+    if (uploadButton) {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'audio/*';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+
+        // Handle upload button click
+        uploadButton.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Handle file selection
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                // Create container for file info and controls
+                const fileContainer = document.createElement('div');
+                fileContainer.className = 'selected-file';
+
+                // Add file name
+                const fileName = document.createElement('span');
+                fileName.textContent = file.name;
+
+                // Create audio player
+                const audioPlayer = document.createElement('audio');
+                audioPlayer.controls = true;
+                audioPlayer.src = URL.createObjectURL(file);
+
+                // Add to container
+                fileContainer.appendChild(fileName);
+                fileContainer.appendChild(audioPlayer);
+
+                // Insert after the buttons but before the controls
+                const controlsSection = document.querySelector('.controls-section');
+                controlsSection.insertBefore(fileContainer, controlsSection.firstChild);
+            }
+        });
+    }
+
+    // Add voice recording functionality
+    const recordButton = document.querySelector('.voice-changer .action-button:first-child');
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+
+    if (recordButton) {
+        recordButton.addEventListener('click', async () => {
+            try {
+                if (!isRecording) {
+                    // Start recording
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+
+                        // Create container for recorded audio
+                        const fileContainer = document.createElement('div');
+                        fileContainer.className = 'selected-file';
+
+                        // Add recording name
+                        const fileName = document.createElement('span');
+                        fileName.textContent = 'Recorded Audio';
+
+                        // Create audio player
+                        const audioPlayer = document.createElement('audio');
+                        audioPlayer.controls = true;
+                        audioPlayer.src = audioUrl;
+
+                        // Add to container
+                        fileContainer.appendChild(fileName);
+                        fileContainer.appendChild(audioPlayer);
+
+                        // Insert into page
+                        const controlsSection = document.querySelector('.controls-section');
+                        let existingContainer = document.querySelector('.selected-file');
+                        if (existingContainer) {
+                            existingContainer.replaceWith(fileContainer);
+                        } else {
+                            controlsSection.insertBefore(fileContainer, controlsSection.firstChild);
+                        }
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordButton.style.background = '#ef4444';  // Red background while recording
+                    recordButton.querySelector('span').textContent = '⏺';
+                    recordButton.querySelector('span').nextSibling.textContent = ' Stop Recording';
+                } else {
+                    // Stop recording
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    isRecording = false;
+                    recordButton.style.background = '';  // Reset background
+                    recordButton.querySelector('span').textContent = '🎤';
+                    recordButton.querySelector('span').nextSibling.textContent = ' Record Voice';
+                }
+            } catch (err) {
+                console.error('Error accessing microphone:', err);
+                alert('Unable to access microphone. Please ensure you have granted permission.');
+            }
+        });
+    }
 }); 
