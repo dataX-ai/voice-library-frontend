@@ -43,8 +43,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.querySelector('.text-to-sfx').classList.add('active');
             } else if (optionText.includes('Voice Changer')) {
                 document.querySelector('.voice-changer').classList.add('active');
-            } else if (optionText.includes('Dubbing')) {
-                document.querySelector('.dubbing').classList.add('active');
             } else if (optionText.includes('Voice Cloning')) {
                 document.querySelector('.voice-cloning').classList.add('active');
             }
@@ -268,6 +266,128 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (err) {
                 console.error('Error accessing microphone:', err);
                 alert('Unable to access microphone. Please ensure you have granted permission.');
+            }
+        });
+    }
+
+    // Add voice cloning functionality
+    const cloningRecordButton = document.querySelector('.voice-cloning .action-button:first-child');
+    const cloningUploadButton = document.querySelector('.voice-cloning .action-button:nth-child(2)');
+
+    // Handle file upload for voice cloning
+    if (cloningUploadButton) {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'audio/*';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+
+        cloningUploadButton.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const fileContainer = document.createElement('div');
+                fileContainer.className = 'selected-file';
+
+                const fileName = document.createElement('span');
+                fileName.textContent = file.name;
+
+                const audioPlayer = document.createElement('audio');
+                audioPlayer.controls = true;
+                audioPlayer.src = URL.createObjectURL(file);
+
+                fileContainer.appendChild(fileName);
+                fileContainer.appendChild(audioPlayer);
+
+                // Insert after buttons
+                const inputContainer = document.querySelector('.voice-cloning .input-container');
+                let existingContainer = inputContainer.querySelector('.selected-file');
+                if (existingContainer) {
+                    existingContainer.replaceWith(fileContainer);
+                } else {
+                    inputContainer.insertBefore(fileContainer, inputContainer.querySelector('.selector-row'));
+                }
+            }
+        });
+    }
+
+    // Handle voice recording for voice cloning
+    if (cloningRecordButton) {
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        cloningRecordButton.addEventListener('click', async () => {
+            try {
+                if (!isRecording) {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+
+                        const fileContainer = document.createElement('div');
+                        fileContainer.className = 'selected-file';
+
+                        const fileName = document.createElement('span');
+                        fileName.textContent = 'Voice Sample Recording';
+
+                        const audioPlayer = document.createElement('audio');
+                        audioPlayer.controls = true;
+                        audioPlayer.src = audioUrl;
+
+                        fileContainer.appendChild(fileName);
+                        fileContainer.appendChild(audioPlayer);
+
+                        const inputContainer = document.querySelector('.voice-cloning .input-container');
+                        let existingContainer = inputContainer.querySelector('.selected-file');
+                        if (existingContainer) {
+                            existingContainer.replaceWith(fileContainer);
+                        } else {
+                            inputContainer.insertBefore(fileContainer, inputContainer.querySelector('.selector-row'));
+                        }
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    cloningRecordButton.style.background = '#ef4444';
+                    cloningRecordButton.querySelector('span').textContent = '⏺';
+                    cloningRecordButton.querySelector('span').nextSibling.textContent = ' Stop Recording';
+                } else {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    isRecording = false;
+                    cloningRecordButton.style.background = '';
+                    cloningRecordButton.querySelector('span').textContent = '🎤';
+                    cloningRecordButton.querySelector('span').nextSibling.textContent = ' Record Voice';
+                }
+            } catch (err) {
+                console.error('Error accessing microphone:', err);
+                alert('Unable to access microphone. Please ensure you have granted permission.');
+            }
+        });
+    }
+
+    // Add character counter for cloning text input
+    const cloningTextarea = document.getElementById('cloning-input');
+    const cloningCharCount = document.querySelector('.voice-cloning .character-count');
+
+    if (cloningTextarea && cloningCharCount) {
+        cloningTextarea.addEventListener('input', function () {
+            const length = this.value.length;
+            cloningCharCount.textContent = `${length}/500`;
+
+            if (length > 500) {
+                this.value = this.value.substring(0, 500);
             }
         });
     }

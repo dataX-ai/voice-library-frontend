@@ -535,7 +535,6 @@
           <div class="voice-option">🎙️ Text to Speech</div>
           <div class="voice-option">🔊 Text to SFX</div>
           <div class="voice-option">🎤 Voice Changer</div>
-          <div class="voice-option">🎬 Dubbing</div>
           <div class="voice-option">👥 Voice Cloning</div>
         </div>
       </div>
@@ -764,34 +763,6 @@
         </div>
       </div>
 
-      <div class="voice-content dubbing">
-        <div class="voice-header">
-          <h1>Video Dubbing</h1>
-          <p>Automatically dub videos into multiple languages while maintaining voice characteristics and lip sync.</p>
-        </div>
-
-        <div class="voice-actions">
-          <button class="action-button">
-            <span>🎬</span> UPLOAD VIDEO
-          </button>
-          <button class="action-button">
-            <span>📝</span> IMPORT SCRIPT
-          </button>
-        </div>
-
-        <div class="language-grid">
-          <div class="language-item">
-            <img src="path-to-flag" alt="English">
-            <span>English</span>
-          </div>
-          <!-- Add more language options -->
-        </div>
-
-        <button class="action-button play-button">
-          <span>▶</span> Start Dubbing
-        </button>
-      </div>
-
       <div class="voice-content voice-cloning">
         <div class="voice-header">
           <h1>Voice Cloning</h1>
@@ -800,20 +771,56 @@
 
         <div class="voice-actions">
           <button class="action-button">
-            <span>🎤</span> RECORD SAMPLES
+            <span>🎤</span> Record Voice
           </button>
           <button class="action-button">
-            <span>📁</span> UPLOAD SAMPLES
+            <span>📁</span> Upload Audio
           </button>
         </div>
 
-        <div class="sample-list">
-          <!-- Sample recordings will appear here -->
-        </div>
+        <div class="input-container">
+          <!-- Audio container will be inserted here -->
+          <div class="selector-row">
+            <div class="selector language-select">
+              <div class="flag-container">
+                <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/us.svg" alt="English" class="flag-icon">
+              </div>
+              <span>English</span>
+              <span class="dropdown-arrow">▼</span>
+              <div class="language-dropdown">
+                <div class="language-option">
+                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/us.svg" alt="English" class="flag-icon">
+                  <span>English</span>
+                </div>
+                <div class="language-option">
+                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/es.svg" alt="Spanish" class="flag-icon">
+                  <span>Spanish</span>
+                </div>
+                <div class="language-option">
+                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/fr.svg" alt="French" class="flag-icon">
+                  <span>French</span>
+                </div>
+                <div class="language-option">
+                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/de.svg" alt="German" class="flag-icon">
+                  <span>German</span>
+                </div>
+                <div class="language-option">
+                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/it.svg" alt="Italian" class="flag-icon">
+                  <span>Italian</span>
+                </div>
+              </div>
+            </div>
+            <span class="character-count">0/500</span>
+          </div>
 
-        <button class="action-button play-button">
-          <span>▶</span> Create Voice Clone
-        </button>
+          <textarea class="text-input" id="cloning-input" placeholder="Type something to say in the cloned voice..."></textarea>
+
+          <div class="button-container">
+            <button class="play-button">
+              <span>▶</span> Generate Speech
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
