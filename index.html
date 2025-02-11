@@ -142,17 +142,38 @@
         align-items: center;
         gap: 8px;
         padding: 12px 24px;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 500;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
         cursor: pointer;
         border: none;
-        background: #f8f9fa;
-        color: #212529;
+        background: #f3f4f6;
+        color: #374151;
+        box-shadow: 
+          0 2px 4px rgba(0, 0, 0, 0.05),
+          0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+        border: 1px solid #e5e7eb;
       }
 
       .action-button:hover {
-        background: #e9ecef;
+        background: #f9fafb;
+        box-shadow: 
+          0 4px 6px rgba(0, 0, 0, 0.05),
+          0 8px 16px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+      }
+
+      .action-button:active {
+        background: #e5e7eb;
+        box-shadow: 
+          0 2px 4px rgba(0, 0, 0, 0.05);
+        transform: translateY(0px);
+      }
+
+      .action-button span {
+        font-size: 18px;
+        font-weight: 600;
       }
 
       .input-container {
@@ -436,18 +457,18 @@
       <div class="voice-content text-to-speech">
         <div class="voice-header">
           <h1>Text to Speech</h1>
-          <p>The ElevenLabs voice generator can deliver high-quality, human-like speech in 32 languages. Perfect for audiobooks, video voiceovers, commercials, and more.</p>
+          <p>The TwelveLabs voice generator can deliver high-quality, human-like speech in 32 languages. Perfect for audiobooks, video voiceovers, commercials, and more.</p>
         </div>
         
         <div class="voice-actions">
           <button class="action-button">
-            <span>📖</span> TELL A STORY
+            <span>📖</span> Tell a Story
           </button>
           <button class="action-button">
-            <span>🎙️</span> INTRODUCE A PODCAST
+            <span>🎙️</span> Intoduce a Podcast
           </button>
           <button class="action-button">
-            <span>🎬</span> CREATE A VIDEO VOICEOVER
+            <span>🎬</span> Create a video voiceover
           </button>
         </div>
 

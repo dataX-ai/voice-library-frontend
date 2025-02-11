@@ -116,4 +116,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             selector.querySelector('span').textContent = voiceName;
         });
     });
+
+    // Update the button click handlers
+    document.querySelectorAll('.action-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const textInput = document.getElementById('text-input');
+            let text = '';
+
+            // Check which button was clicked based on its content
+            if (this.textContent.includes('Tell a Story')) {
+                text = "Once, a curious inventor named Leo built a machine to capture dreams. At night, it recorded the colors, sounds, and feelings people experienced in their sleep. The machine made an extraordinary discovery—dreams could be shared and felt by others. Leo's invention brought people closer, allowing them to experience each other's joy, fears, and desires. It showed that we're all connected by the unseen threads of our subconscious. The dream world became a place for true empathy";
+            } else if (this.textContent.includes('Intoduce a Podcast')) {
+                text = "Welcome to The Storyteller's Journey, where we dive deep into the art of crafting unforgettable narratives. Each episode, we explore the power of storytelling, from personal experiences to timeless tales that have shaped cultures. Join me as I chat with writers, filmmakers, and creators who have mastered the craft, offering insights that will help you unlock the storyteller within. Let's journey into the world of words and wonders together";
+            } else if (this.textContent.includes('Create a video voiceover')) {
+                text = "Every day, millions of moments unfold in this city—some fleeting, others life-changing. What makes each one special? The stories behind them. Today, we take you on a journey through the streets, capturing the heartbeat of this urban jungle. From unexpected encounters to quiet reflections, let's uncover the stories that bring this place to life";
+            }
+
+            if (textInput && text) {
+                textInput.value = text;
+
+                // Trigger input event to update character count
+                const inputEvent = new Event('input', {
+                    bubbles: true,
+                    cancelable: true,
+                });
+                textInput.dispatchEvent(inputEvent);
+            }
+        });
+    });
 }); 
