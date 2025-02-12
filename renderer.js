@@ -37,7 +37,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             // Show appropriate content based on option clicked
-            if (optionText.includes('Text to Speech')) {
+            if (optionText.includes('Search Models')) {
+                document.querySelector('.model-search').classList.add('active');
+            } else if (optionText.includes('Text to Speech')) {
                 document.querySelector('.text-to-speech').classList.add('active');
             } else if (optionText.includes('Text to SFX')) {
                 document.querySelector('.text-to-sfx').classList.add('active');
@@ -391,4 +393,54 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    // Add this to your existing code
+    const modelSearchInput = document.getElementById('modelSearchInput');
+    const searchResults = document.querySelector('.search-results');
+
+    if (modelSearchInput) {
+        // Show search results when typing
+        modelSearchInput.addEventListener('input', function () {
+            if (this.value.length > 0) {
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        // Handle clicking outside to close search results
+        document.addEventListener('click', function (e) {
+            if (!modelSearchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        // Handle search result selection
+        document.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('click', function () {
+                const modelTitle = this.querySelector('.result-title').textContent;
+                modelSearchInput.value = modelTitle;
+                searchResults.style.display = 'none';
+
+                // Show model details section
+                document.querySelector('.model-list').style.display = 'block';
+            });
+        });
+    }
+
+    // Add this to handle model selection
+    document.querySelectorAll('.model-list-item').forEach(item => {
+        item.addEventListener('click', function () {
+            // Remove selected class from all items
+            document.querySelectorAll('.model-list-item').forEach(i => {
+                i.classList.remove('selected');
+            });
+
+            // Add selected class to clicked item
+            this.classList.add('selected');
+
+            // Show model details section
+            document.querySelector('.model-details-section').style.display = 'block';
+        });
+    });
 }); 
