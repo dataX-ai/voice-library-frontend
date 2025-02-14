@@ -49,6 +49,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.querySelector('.voice-cloning').classList.add('active');
             } else if (optionText.includes('System Info')) {
                 document.querySelector('.system-info').classList.add('active');
+            } else if (optionText.includes('Runtimes')) {
+                document.querySelector('.runtimes').classList.add('active');
             }
 
             // Close the dropdown after selection
@@ -560,7 +562,6 @@ async function updatePerformanceStats() {
                 MemoryTotal: `${(g.memoryTotal / 1024).toFixed(2)} GB`
             }))
         });
-
         // Update RAM + VRAM usage
         const ramVramElement = document.querySelector('.monitor-card:first-child .monitor-value');
         if (ramVramElement) {
@@ -578,3 +579,4 @@ async function updatePerformanceStats() {
         console.error('Error updating performance stats:', error);
     }
 } 
+

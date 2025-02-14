@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs').promises;
 const si = require('systeminformation');
 const os = require('os');
+const { exec } = require('child_process');
+const DockerManager = require('./runtimes/docker.js');
 
 // Move these lines before app.whenReady()
 app.disableHardwareAcceleration();
@@ -196,5 +198,32 @@ ipcMain.handle('get-performance-stats', async () => {
     } catch (error) {
         console.error('Error getting performance stats:', error);
         return null;
+    }
+});
+
+// Docker-related IPC handlers
+ipcMain.handle('check-docker', async () => {
+    return await DockerManager.checkInstallation();
+});
+
+ipcMain.handle('install-docker', async () => {
+    try {
+        return await DockerManager.installDocker();
+    } catch (error) {
+        console.error('Docker installation error:', error);
+        throw error;
+    }
+});
+
+ipcMain.handle('docker-status', async () => {
+    return await DockerManager.checkServiceStatus();
+});
+
+ipcMain.handle('docker-version', async () => {
+    try {
+        return await DockerManager.getVersionInfo();
+    } catch (error) {
+        console.error('Error getting Docker version:', error);
+        throw error;
     }
 }); 

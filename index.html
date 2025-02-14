@@ -1210,6 +1210,7 @@
           <div class="voice-option">🔊 Text to SFX</div>
           <div class="voice-option">👥 Voice Changer</div>
           <div class="voice-option">👥 Voice Cloning</div>
+          <div class="voice-option">🔧 Runtimes</div>
         </div>
       </div>
       <div class="sidebar-icon image">🖼️
@@ -1232,7 +1233,8 @@
       </div>
       <div class="sidebar-icon hardware">🖥️
         <div class="voice-dropdown">
-          <div class="voice-option">🖥 System Info</div>
+          <div class="voice-option">�� System Info</div>
+          <div class="voice-option">⚙️ Runtimes</div>
         </div>
       </div>
     </div>
@@ -1785,8 +1787,22 @@
           </div>
         </div>
       </div>
+
+      <div class="voice-content runtimes">
+        <div class="content-header">
+          <h2>Runtimes</h2>
+          <p>Manage your runtime environments</p>
+        </div>
+        <div class="runtime-container">
+          <button class="action-button check-docker">
+            <span>🐳</span> Check Docker Installation
+          </button>
+          <div class="docker-status"></div>
+        </div>
+      </div>
     </div>
 
     <script src="renderer.js"></script>
+    <script src="runtime.js"></script>
   </body>
 </html> 

@@ -1,0 +1,38 @@
+.runtimes {
+    display: none;
+    padding: 20px;
+}
+
+.runtimes.active {
+    display: block;
+}
+
+.runtime-container {
+    background: var(--secondary-bg);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.docker-status {
+    margin-top: 20px;
+}
+
+.status-message {
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.status-message.success {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.status-message.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+} 
