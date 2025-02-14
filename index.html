@@ -1200,6 +1200,22 @@
           max-width: none;
         }
       }
+
+      /* Add these styles to your existing CSS */
+      .loading {
+        opacity: 0.7;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% { opacity: 0.7; }
+        50% { opacity: 0.4; }
+        100% { opacity: 0.7; }
+      }
+
+      .chip-badge, .info-value, .monitor-value {
+        min-width: 40px;  /* Prevent layout shift when loading */
+      }
     </style>
   </head>
   <body>
@@ -1693,20 +1709,19 @@
           <div class="info-card">
             <div class="info-header">
               <h2>CPU <span class="info-icon">ⓘ</span></h2>
-              <span class="compatibility-badge">✓ Compatible</span>
+              <span class="compatibility-badge">Checking...</span>
             </div>
             <div class="info-content">
               <div class="info-row">
                 <span class="info-label">Architecture</span>
                 <span class="info-value">
-                  <span class="chip-badge">x86_64</span>
+                  <span class="chip-badge">Loading...</span>
                 </span>
               </div>
               <div class="info-row">
                 <span class="info-label">Instruction Set Extensions</span>
                 <div class="chip-group">
-                  <span class="chip-badge">AVX</span>
-                  <span class="chip-badge">AVX2</span>
+                  <!-- Will be populated by JS -->
                 </div>
               </div>
             </div>
@@ -1716,16 +1731,16 @@
           <div class="info-card">
             <div class="info-header">
               <h2>GPUs <span class="info-icon">ⓘ</span></h2>
-              <span class="gpu-count">1 GPU detected</span>
+              <span class="gpu-count">Detecting GPUs...</span>
             </div>
             <div class="info-content">
               <div class="info-row">
-                <span class="gpu-model">NVIDIA GeForce GTX 1650</span>
-                <span class="chip-badge cuda">CUDA</span>
+                <span class="gpu-model">Loading GPU info...</span>
+                <span class="chip-badge cuda">-</span>
               </div>
               <div class="info-row">
                 <span class="info-label">VRAM Capacity</span>
-                <span class="info-value">4.00 GB</span>
+                <span class="info-value">-</span>
               </div>
             </div>
           </div>
@@ -1738,11 +1753,11 @@
             <div class="info-content">
               <div class="info-row">
                 <span class="info-label">RAM</span>
-                <span class="info-value">15.85 GB</span>
+                <span class="info-value">-</span>
               </div>
               <div class="info-row">
                 <span class="info-label">VRAM</span>
-                <span class="info-value">4.00 GB</span>
+                <span class="info-value">-</span>
               </div>
             </div>
           </div>
@@ -1775,11 +1790,11 @@
             <div class="monitor-grid">
               <div class="monitor-card">
                 <span class="monitor-label">RAM + VRAM</span>
-                <span class="monitor-value">0 GB</span>
+                <span class="monitor-value">-</span>
               </div>
               <div class="monitor-card">
                 <span class="monitor-label">CPU</span>
-                <span class="monitor-value">0.00%</span>
+                <span class="monitor-value">-</span>
               </div>
             </div>
           </div>
