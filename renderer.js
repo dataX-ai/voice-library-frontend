@@ -1,21 +1,17 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // Track current active dropdown
+    // Remove backdrop creation
     let activeDropdown = null;
 
-    // Handle sidebar icon clicks to show/hide dropdown
     document.querySelectorAll('.sidebar-icon').forEach(icon => {
         icon.addEventListener('click', function (e) {
             e.stopPropagation();
             const dropdown = this.querySelector('.voice-dropdown');
 
-            // Close any other open dropdown
             if (activeDropdown && activeDropdown !== dropdown) {
                 activeDropdown.style.display = 'none';
             }
 
-            // Toggle current dropdown
-            const isVisible = window.getComputedStyle(dropdown).display !== 'none';
-            if (isVisible) {
+            if (dropdown.style.display === 'block') {
                 dropdown.style.display = 'none';
                 activeDropdown = null;
             } else {
@@ -110,7 +106,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Add this to your existing DOMContentLoaded event listener
+    // Update the language selector handlers
+    document.querySelectorAll('.language-select').forEach(selector => {
+        selector.addEventListener('click', function (e) {
+            e.stopPropagation();
+
+            // Close any other open dropdowns
+            document.querySelectorAll('.language-select.active').forEach(active => {
+                if (active !== this) active.classList.remove('active');
+            });
+
+            // Toggle current dropdown
+            this.classList.toggle('active');
+        });
+    });
+
+    // Original language option handling
     document.querySelectorAll('.language-option').forEach(option => {
         option.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -123,16 +134,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Add this to your existing code
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.language-select.active').forEach(dropdown => {
+            dropdown.classList.remove('active');
+        });
+    });
+
+    // Handle voice model selection
     document.querySelectorAll('.voice-model-option').forEach(option => {
         option.addEventListener('click', function (e) {
             e.stopPropagation();
-            const avatarImg = this.querySelector('.avatar-icon').cloneNode(true);
-            const voiceName = this.querySelector('span').textContent;
+            const avatar = this.querySelector('.voice-avatar img').cloneNode(true);
+            const voiceName = this.querySelector('.voice-name').textContent;
 
             const selector = this.closest('.voice-select');
-            selector.querySelector('.voice-avatar img').replaceWith(avatarImg);
+            selector.querySelector('.voice-avatar img').replaceWith(avatar);
             selector.querySelector('span').textContent = voiceName;
+            selector.classList.remove('active');
         });
     });
 
