@@ -1,14 +1,11 @@
 // preload.js 
 
 const { contextBridge, ipcRenderer } = require('electron');
-const path = require('path');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    getModelsDirectory: () => ipcRenderer.invoke('get-models-directory'),
+    getSystemInfo: () => ipcRenderer.invoke('get-system-info'),
+    getPerformanceStats: () => ipcRenderer.invoke('get-performance-stats'),
     selectDirectory: () => ipcRenderer.invoke('select-directory'),
-    listModels: (directory) => ipcRenderer.invoke('list-models', directory)
-});
-
-contextBridge.exposeInMainWorld('electron', {
+    listModels: (directory) => ipcRenderer.invoke('list-models', directory),
     switchContent: (contentType) => ipcRenderer.send('switch-content', contentType)
 }); 

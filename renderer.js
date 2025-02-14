@@ -56,6 +56,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 activeDropdown.style.display = 'none';
                 activeDropdown = null;
             }
+
+            if (optionText.includes('System Info')) {
+                updateSystemInfo();
+                // Start periodic updates for performance stats
+                const statsInterval = setInterval(updatePerformanceStats, 1000);
+                // Store the interval ID to clear it when switching away
+                this.dataset.statsInterval = statsInterval;
+            } else if (this.dataset.statsInterval) {
+                // Clear the interval when switching to a different page
+                clearInterval(this.dataset.statsInterval);
+                delete this.dataset.statsInterval;
+            }
         });
     });
 
@@ -445,4 +457,124 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.querySelector('.model-details-section').style.display = 'block';
         });
     });
-}); 
+
+    // Initial system info update if starting on system info page
+    if (document.querySelector('.system-info').classList.contains('active')) {
+        updateSystemInfo();
+        updatePerformanceStats();
+    }
+});
+
+// Update the updateSystemInfo function
+async function updateSystemInfo() {
+    try {
+        const sysInfo = await window.electronAPI.getSystemInfo();  // Use electronAPI instead of electron
+        console.log('Received system info:', sysInfo);  // Add this line for debugging
+
+        // Log the entire system info object
+        console.log('System Information:', {
+            CPU: {
+                Architecture: sysInfo.cpu.architecture,
+                Model: sysInfo.cpu.model,
+                Cores: sysInfo.cpu.cores,
+                PhysicalCores: sysInfo.cpu.physicalCores,
+                Speed: sysInfo.cpu.speed,
+                Instructions: sysInfo.cpu.instructions
+            },
+            Memory: {
+                Total: `${(sysInfo.memory.total / (1024 * 1024 * 1024)).toFixed(2)} GB`,
+                Free: `${(sysInfo.memory.free / (1024 * 1024 * 1024)).toFixed(2)} GB`,
+                Used: `${(sysInfo.memory.used / (1024 * 1024 * 1024)).toFixed(2)} GB`
+            },
+            GPU: sysInfo.gpu.map(g => ({
+                Model: g.model,
+                VRAM: `${(g.vram / 1024).toFixed(2)} GB`,
+                Vendor: g.vendor
+            }))
+        });
+
+        // Update CPU Architecture
+        const archElement = document.querySelector('.info-card:nth-child(1) .info-row:first-child .chip-badge');
+        if (archElement) {
+            archElement.textContent = sysInfo.cpu.architecture;
+        }
+
+        // Update Instruction Set Extensions
+        const instructionSet = document.querySelector('.info-card:nth-child(1) .chip-group');
+        if (instructionSet) {
+            instructionSet.innerHTML = '';
+            if (sysInfo.cpu.instructions.hasAVX) {
+                instructionSet.innerHTML += '<span class="chip-badge">AVX</span>';
+            }
+            if (sysInfo.cpu.instructions.hasAVX2) {
+                instructionSet.innerHTML += '<span class="chip-badge">AVX2</span>';
+            }
+        }
+
+        // Update GPU info
+        if (sysInfo.gpu.length > 0) {
+            const gpu = sysInfo.gpu[0];  // Using first GPU
+            const gpuModelElement = document.querySelector('.info-card:nth-child(2) .gpu-model');
+            const gpuCountElement = document.querySelector('.info-card:nth-child(2) .gpu-count');
+            const vramElement = document.querySelector('.info-card:nth-child(2) .info-row:last-child .info-value');
+
+            if (gpuModelElement) gpuModelElement.textContent = gpu.model;
+            if (gpuCountElement) gpuCountElement.textContent = `${sysInfo.gpu.length} GPU detected`;
+            if (vramElement) vramElement.textContent = `${(gpu.vram / 1024).toFixed(2)} GB`;
+        }
+
+        // Update Memory info
+        const ramElement = document.querySelector('.info-card:nth-child(3) .info-row:first-child .info-value');
+        const vramTotalElement = document.querySelector('.info-card:nth-child(3) .info-row:last-child .info-value');
+
+        if (ramElement) {
+            const totalRAM = (sysInfo.memory.total / (1024 * 1024 * 1024)).toFixed(2);
+            ramElement.textContent = `${totalRAM} GB`;
+        }
+
+        if (vramTotalElement && sysInfo.gpu.length > 0) {
+            vramTotalElement.textContent = `${(sysInfo.gpu[0].vram / 1024).toFixed(2)} GB`;
+        }
+
+    } catch (error) {
+        console.error('Error updating system info:', error);
+    }
+}
+
+// Update the updatePerformanceStats function
+async function updatePerformanceStats() {
+    try {
+        const stats = await window.electronAPI.getPerformanceStats();  // Use electronAPI instead of electron
+        console.log('Received performance stats:', stats);  // Add this line for debugging
+
+        // Log the performance stats
+        console.log('Performance Stats:', {
+            CPU_Usage: `${stats.cpu}%`,
+            Memory: {
+                Used: `${(stats.memory.used / (1024 * 1024 * 1024)).toFixed(2)} GB`,
+                Total: `${(stats.memory.total / (1024 * 1024 * 1024)).toFixed(2)} GB`
+            },
+            GPU: stats.gpu.map(g => ({
+                Usage: `${g.usage}%`,
+                MemoryUsed: `${(g.memoryUsed / 1024).toFixed(2)} GB`,
+                MemoryTotal: `${(g.memoryTotal / 1024).toFixed(2)} GB`
+            }))
+        });
+
+        // Update RAM + VRAM usage
+        const ramVramElement = document.querySelector('.monitor-card:first-child .monitor-value');
+        if (ramVramElement) {
+            const ramUsage = (stats.memory.used / (1024 * 1024 * 1024)).toFixed(2);
+            ramVramElement.textContent = `${ramUsage} GB`;
+        }
+
+        // Update CPU usage
+        const cpuElement = document.querySelector('.monitor-card:last-child .monitor-value');
+        if (cpuElement) {
+            cpuElement.textContent = `${stats.cpu}%`;
+        }
+
+    } catch (error) {
+        console.error('Error updating performance stats:', error);
+    }
+} 
