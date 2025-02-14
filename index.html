@@ -67,21 +67,28 @@
         border: 2px solid #ccccff;
       }
 
+      .sidebar-icon.hardware {
+        background-color: #e6f2ff;
+        color: #0066cc;
+        border: 2px solid #cce5ff;
+      }
+
       .voice-dropdown {
         position: absolute;
         left: 60px;
         top: 0;
-        background: white;
+        background-color: #ffffff;
         border: 1px solid #e9ecef;
         border-radius: 8px;
         width: 180px;
         padding: 8px 0;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        z-index: 1002;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        z-index: 9999;
+        display: none;
       }
 
-      .sidebar-icon:not(:hover) .voice-dropdown {
-        display: none;
+      .voice-dropdown.show {
+        display: block;
       }
 
       .voice-option {
@@ -93,6 +100,7 @@
         align-items: center;
         gap: 8px;
         transition: background-color 0.2s;
+        background-color: #ffffff;
       }
 
       .voice-option:hover {
@@ -111,6 +119,7 @@
         padding-left: 60px;
         height: 100vh;
         overflow-y: auto;
+        position: relative;
       }
 
       .voice-content {
@@ -914,6 +923,230 @@
       .model-info {
         margin: 16px 0;
       }
+
+      .system-info {
+        padding: 0;
+        max-width: 100%;
+        margin: 0;
+        display: none;
+        height: 100vh;
+        overflow-y: auto;
+      }
+
+      .system-info.active {
+        display: block;
+      }
+
+      .system-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 24px;
+        padding: 24px;
+        margin: 0 24px;
+      }
+
+      .info-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+        min-width: 0;
+      }
+
+      .info-card.full-width {
+        grid-column: 1 / -1;
+        max-width: none;
+      }
+
+      .info-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .info-header h2 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .info-icon {
+        color: #6b7280;
+        font-size: 14px;
+      }
+
+      .compatibility-badge {
+        color: #059669;
+        font-size: 14px;
+      }
+
+      .info-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .info-label {
+        color: #6b7280;
+        font-size: 14px;
+      }
+
+      .chip-badge {
+        background: #f3f4f6;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #374151;
+      }
+
+      .chip-badge.cuda {
+        background: #fff7ed;
+        color: #c2410c;
+        border: 1px solid #fed7aa;
+      }
+
+      .chip-group {
+        display: flex;
+        gap: 8px;
+      }
+
+      .gpu-count {
+        color: #6b7280;
+        font-size: 14px;
+      }
+
+      .gpu-model {
+        font-weight: 500;
+        color: #374151;
+      }
+
+      .guardrail-selector {
+        background: #f9fafb;
+        padding: 12px;
+        border-radius: 8px;
+      }
+
+      .selected-guardrail {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+      }
+
+      .guardrail-description {
+        font-size: 13px;
+        color: #6b7280;
+      }
+
+      .monitor-note {
+        font-size: 13px;
+        color: #6b7280;
+      }
+
+      .monitor-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+
+      .monitor-card {
+        background: #f9fafb;
+        padding: 16px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .monitor-label {
+        font-size: 14px;
+        color: #6b7280;
+      }
+
+      .monitor-value {
+        font-size: 16px;
+        font-weight: 500;
+        color: #374151;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 2px;
+      }
+
+      .system-header {
+        padding: 12px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        background: white;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .title-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .title-section h1 {
+        font-size: 16px;
+        font-weight: 500;
+        color: #374151;
+      }
+
+      .header-button {
+        padding: 6px 12px;
+        border: none;
+        background: none;
+        font-size: 14px;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+
+      .header-button:hover {
+        background: #f3f4f6;
+      }
+
+      .header-button.expand,
+      .header-button.close {
+        padding: 6px;
+      }
+
+      .header-button span {
+        font-size: 14px;
+      }
+
+      /* Add new styles for dropdown container */
+      .dropdown-container {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9998;
+        display: none;
+      }
+
+      .dropdown-container.show {
+        display: block;
+      }
     </style>
   </head>
   <body>
@@ -922,7 +1155,7 @@
         <div class="voice-dropdown">
           <div class="voice-option">🎙️ Text to Speech</div>
           <div class="voice-option">🔊 Text to SFX</div>
-          <div class="voice-option">🎤 Voice Changer</div>
+          <div class="voice-option">👥 Voice Changer</div>
           <div class="voice-option">👥 Voice Cloning</div>
         </div>
       </div>
@@ -942,6 +1175,11 @@
         <div class="voice-dropdown">
           <div class="voice-option">🔎 Search Models</div>
           <div class="voice-option">📊 Search History</div>
+        </div>
+      </div>
+      <div class="sidebar-icon hardware">🖥️
+        <div class="voice-dropdown">
+          <div class="voice-option">🖥 System Info</div>
         </div>
       </div>
     </div>
@@ -1329,6 +1567,166 @@
 
                 <h3>Technical Details</h3>
                 <p>Supports a context length of up to 1M tokens.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="voice-content hardware-section">
+        <div class="voice-header">
+          <h1>Hardware</h1>
+          <p>Monitor system resources and optimize performance for AI model inference.</p>
+        </div>
+
+        <div class="voice-actions">
+          <button class="action-button">
+            <span>📈</span> Performance
+          </button>
+        </div>
+
+        <div class="input-container">
+          <div class="controls-section">
+            <div class="effect-controls">
+              <div class="effect-slider">
+                <div class="slider-header">
+                  <label>CPU Usage</label>
+                  <span class="slider-value">32%</span>
+                </div>
+                <input type="range" min="0" max="100" value="32" id="cpu-slider" disabled>
+              </div>
+              <div class="effect-slider">
+                <div class="slider-header">
+                  <label>Memory Usage</label>
+                  <span class="slider-value">45%</span>
+                </div>
+                <input type="range" min="0" max="100" value="45" id="memory-slider" disabled>
+              </div>
+              <div class="effect-slider">
+                <div class="slider-header">
+                  <label>GPU Usage</label>
+                  <span class="slider-value">78%</span>
+                </div>
+                <input type="range" min="0" max="100" value="78" id="gpu-slider" disabled>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="voice-content system-info">
+        <div class="system-header">
+          <div class="title-section">
+            <h1>System Resources</h1>
+            <div class="header-actions">
+              <button class="header-button">
+                <span>📋</span> Copy Info
+              </button>
+              <button class="header-button">
+                <span>👥</span> Community
+              </button>
+              <button class="header-button expand">
+                <span>⤢</span>
+              </button>
+              <button class="header-button close">
+                <span>×</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="system-info-grid">
+          <!-- CPU Section -->
+          <div class="info-card">
+            <div class="info-header">
+              <h2>CPU <span class="info-icon">ⓘ</span></h2>
+              <span class="compatibility-badge">✓ Compatible</span>
+            </div>
+            <div class="info-content">
+              <div class="info-row">
+                <span class="info-label">Architecture</span>
+                <span class="info-value">
+                  <span class="chip-badge">x86_64</span>
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Instruction Set Extensions</span>
+                <div class="chip-group">
+                  <span class="chip-badge">AVX</span>
+                  <span class="chip-badge">AVX2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- GPUs Section -->
+          <div class="info-card">
+            <div class="info-header">
+              <h2>GPUs <span class="info-icon">ⓘ</span></h2>
+              <span class="gpu-count">1 GPU detected</span>
+            </div>
+            <div class="info-content">
+              <div class="info-row">
+                <span class="gpu-model">NVIDIA GeForce GTX 1650</span>
+                <span class="chip-badge cuda">CUDA</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">VRAM Capacity</span>
+                <span class="info-value">4.00 GB</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Memory Capacity Section -->
+          <div class="info-card">
+            <div class="info-header">
+              <h2>Memory Capacity <span class="info-icon">ⓘ</span></h2>
+            </div>
+            <div class="info-content">
+              <div class="info-row">
+                <span class="info-label">RAM</span>
+                <span class="info-value">15.85 GB</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">VRAM</span>
+                <span class="info-value">4.00 GB</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Guardrails Section -->
+          <div class="info-card">
+            <div class="info-header">
+              <h2>Guardrails <span class="info-icon">ⓘ</span></h2>
+            </div>
+            <div class="info-content">
+              <div class="info-row">
+                <span class="info-label">Model loading guardrails</span>
+              </div>
+              <div class="guardrail-selector">
+                <div class="selected-guardrail">
+                  <span>Strict</span>
+                  <span class="dropdown-arrow">▼</span>
+                </div>
+                <p class="guardrail-description">Strong precautions against system overload</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resource Monitor Section -->
+          <div class="info-card full-width">
+            <div class="info-header">
+              <h2>Resource Monitor</h2>
+              <span class="monitor-note">Best approximation. May differ from other monitors</span>
+            </div>
+            <div class="monitor-grid">
+              <div class="monitor-card">
+                <span class="monitor-label">RAM + VRAM</span>
+                <span class="monitor-value">0 GB</span>
+              </div>
+              <div class="monitor-card">
+                <span class="monitor-label">CPU</span>
+                <span class="monitor-value">0.00%</span>
               </div>
             </div>
           </div>

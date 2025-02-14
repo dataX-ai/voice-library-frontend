@@ -10,17 +10,19 @@ try {
 } catch (_) { console.log('Error'); }
 
 function createWindow() {
-    const mainWindow = new BrowserWindow({
+    const win = new BrowserWindow({
         width: 1200,
         height: 800,
+        minWidth: 1024,
+        minHeight: 768,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
-            nodeIntegration: false,
-            contextIsolation: true
+            nodeIntegration: true,
+            contextIsolation: false
         }
     });
 
-    mainWindow.loadFile('index.html');
+    win.loadFile('index.html');
 
     // Open DevTools (optional, for development)
     // mainWindow.webContents.openDevTools()
@@ -58,4 +60,12 @@ ipcMain.handle('list-models', async (event, directory) => {
         console.error('Error listing models:', error);
         return [];
     }
-}); 
+});
+
+// Add IPC handler
+ipcMain.on('switch-content', (event, contentType) => {
+    const win = BrowserWindow.getFocusedWindow()
+    if (win) {
+        win.webContents.send('content-switched', contentType)
+    }
+}) 

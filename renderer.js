@@ -47,6 +47,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.querySelector('.voice-changer').classList.add('active');
             } else if (optionText.includes('Voice Cloning')) {
                 document.querySelector('.voice-cloning').classList.add('active');
+            } else if (optionText.includes('System Info')) {
+                document.querySelector('.system-info').classList.add('active');
             }
 
             // Close the dropdown after selection
