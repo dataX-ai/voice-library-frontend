@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <title>My AI Models App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
       * {
         margin: 0;
@@ -39,39 +40,24 @@
         margin-bottom: 15px;
         border-radius: 8px;
         cursor: pointer;
-        font-size: 24px;
         position: relative;
+        transition: all 0.2s ease;
       }
 
-      .sidebar-icon.voice {
-        background-color: #fff7e6;
-        color: #ffc107;
-        border: 2px solid #fff0cc;
+      .sidebar-icon i {
+        font-size: 18px;  /* Adjust size as needed */
       }
 
-      .sidebar-icon.image {
-        background-color: #e6ffe6;
-        color: #28a745;
-        border: 2px solid #ccffcc;
+      .voice-option i {
+        width: 20px;  /* Fixed width for alignment */
+        text-align: center;
       }
 
-      .sidebar-icon.folder {
-        background-color: #ffe6e6;
-        color: #dc3545;
-        border: 2px solid #ffcccc;
-      }
-
-      .sidebar-icon.search {
-        background-color: #e6e6ff;
-        color: #6610f2;
-        border: 2px solid #ccccff;
-      }
-
-      .sidebar-icon.hardware {
-        background-color: #e6f2ff;
-        color: #0066cc;
-        border: 2px solid #cce5ff;
-      }
+      .sidebar-icon.voice i { color: #ffc107; }
+      .sidebar-icon.image i { color: #28a745; }
+      .sidebar-icon.folder i { color: #dc3545; }
+      .sidebar-icon.search i { color: #6610f2; }
+      .sidebar-icon.hardware i { color: #0066cc; }
 
       .voice-dropdown {
         position: absolute;
@@ -99,12 +85,17 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        transition: background-color 0.2s;
         background-color: #ffffff;
+        position: relative;
+        z-index: 10000;
       }
 
       .voice-option:hover {
         background-color: #f8f9fa;
+      }
+
+      .voice-option:not(:last-child) {
+        border-bottom: 1px solid #f1f3f5;
       }
 
       .sidebar-icon:hover {
@@ -138,18 +129,27 @@
 
       .voice-header {
         margin-bottom: 32px;
+        background: linear-gradient(145deg, #f8f9ff 0%, #f1f3ff 100%);
+        padding: 24px;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
       }
 
       .voice-header h1 {
-        font-size: 24px;
+        font-size: 28px;
         margin-bottom: 12px;
         color: #1a1a1a;
+        display: flex;
+        align-items: center;
+        gap: 12px;
       }
 
       .voice-header p {
-        color: #6c757d;
+        color: #4b5563;
         font-size: 16px;
-        line-height: 1.5;
+        line-height: 1.6;
+        max-width: 800px;
       }
 
       .voice-actions {
@@ -221,9 +221,25 @@
       }
 
       .selector {
-        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        background: white;
+        font-size: 14px;
+        position: relative;
         min-width: 180px;
-        max-width: 300px;
+        height: 40px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        transition: all 0.2s ease;
+      }
+
+      .selector:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        transform: translateY(-1px);
       }
 
       .character-count {
@@ -1200,40 +1216,166 @@
           max-width: none;
         }
       }
+
+      /* Add these styles to your existing CSS */
+      .loading {
+        opacity: 0.7;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% { opacity: 0.7; }
+        50% { opacity: 0.4; }
+        100% { opacity: 0.7; }
+      }
+
+      .chip-badge, .info-value, .monitor-value {
+        min-width: 40px;  /* Prevent layout shift when loading */
+      }
+
+      /* Add a new overlay to prevent transparency */
+      .dropdown-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 9998;
+        display: none;
+      }
+
+      .dropdown-backdrop.show {
+        display: block;
+      }
+
+      /* Remove the transform properties as they might be causing issues */
+      .sidebar, .sidebar-icon, .voice-dropdown, .voice-option {
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* Add to your existing CSS */
+      .action-button i {
+        font-size: 16px;
+      }
+
+      .file-actions i {
+        font-size: 14px;
+      }
+
+      .header-button i {
+        font-size: 14px;
+      }
+
+      .stats-group i {
+        color: #6b7280;
+      }
+
+      .info-icon i {
+        color: #6b7280;
+        font-size: 14px;
+      }
+
+      .dropdown-arrow i {
+        color: #6b7280;
+        font-size: 12px;
+      }
+
+      /* Style for different section headers */
+      .text-to-speech .voice-header {
+        background: linear-gradient(145deg, #f0f7ff 0%, #e6f0ff 100%);
+        border-left: 4px solid #2563eb;
+      }
+
+      .text-to-sfx .voice-header {
+        background: linear-gradient(145deg, #fff7f0 0%, #ffe6d5 100%);
+        border-left: 4px solid #ea580c;
+      }
+
+      .voice-changer .voice-header {
+        background: linear-gradient(145deg, #f0fff4 0%, #dcfce7 100%);
+        border-left: 4px solid #16a34a;
+      }
+
+      .voice-cloning .voice-header {
+        background: linear-gradient(145deg, #fdf4ff 0%, #fae8ff 100%);
+        border-left: 4px solid #9333ea;
+      }
+
+      /* Add icons to headers */
+      .text-to-speech .voice-header h1:before {
+        content: '\f130';  /* Microphone icon */
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        color: #2563eb;
+      }
+
+      .text-to-sfx .voice-header h1:before {
+        content: '\f028';  /* Volume icon */
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        color: #ea580c;
+      }
+
+      .voice-changer .voice-header h1:before {
+        content: '\f3e5';  /* Exchange icon */
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        color: #16a34a;
+      }
+
+      .voice-cloning .voice-header h1:before {
+        content: '\f0c0';  /* Users icon */
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        color: #9333ea;
+      }
+
+      /* Add subtle animation on hover */
+      .voice-header:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+      }
     </style>
   </head>
   <body>
     <div class="sidebar">
-      <div class="sidebar-icon voice">🎙️
+      <div class="sidebar-icon voice">
+        <i class="fas fa-microphone"></i>
         <div class="voice-dropdown">
-          <div class="voice-option">🎙️ Text to Speech</div>
-          <div class="voice-option">🔊 Text to SFX</div>
-          <div class="voice-option">👥 Voice Changer</div>
-          <div class="voice-option">👥 Voice Cloning</div>
+          <div class="voice-option"><i class="fas fa-comment-dots"></i> Text to Speech</div>
+          <div class="voice-option"><i class="fas fa-volume-up"></i> Text to SFX</div>
+          <div class="voice-option"><i class="fas fa-exchange-alt"></i> Voice Changer</div>
+          <div class="voice-option"><i class="fas fa-user-friends"></i> Voice Cloning</div>
           <div class="voice-option">🔧 Runtimes</div>
         </div>
       </div>
-      <div class="sidebar-icon image">🖼️
+      <div class="sidebar-icon image">
+        <i class="fas fa-image"></i>
         <div class="voice-dropdown">
-          <div class="voice-option">🎨 Image Generation</div>
-          <div class="voice-option">✏️ Image Editing</div>
+          <div class="voice-option"><i class="fas fa-paint-brush"></i> Image Generation</div>
+          <div class="voice-option"><i class="fas fa-edit"></i> Image Editing</div>
         </div>
       </div>
-      <div class="sidebar-icon folder">📂
+      <div class="sidebar-icon folder">
+        <i class="fas fa-folder"></i>
         <div class="voice-dropdown">
-          <div class="voice-option">📂 Browse Files</div>
-          <div class="voice-option">📂 Save Location</div>
+          <div class="voice-option"><i class="fas fa-folder-open"></i> Browse Files</div>
+          <div class="voice-option"><i class="fas fa-save"></i> Save Location</div>
         </div>
       </div>
       <div class="sidebar-icon search">
+        <i class="fas fa-search"></i>
         <div class="voice-dropdown">
-          <div class="voice-option">🔎 Search Models</div>
-          <div class="voice-option">📊 Search History</div>
+          <div class="voice-option"><i class="fas fa-search"></i> Search Models</div>
+          <div class="voice-option"><i class="fas fa-history"></i> Search History</div>
         </div>
       </div>
-      <div class="sidebar-icon hardware">🖥️
+      <div class="sidebar-icon hardware">
+        <i class="fas fa-microchip"></i>
         <div class="voice-dropdown">
-          <div class="voice-option">🖥 System Info</div>
+          <div class="voice-option"><i class="fas fa-desktop"></i> System Info</div>
           <div class="voice-option">⚙️ Runtimes</div>
         </div>
       </div>
@@ -1247,13 +1389,13 @@
         
         <div class="voice-actions">
           <button class="action-button">
-            <span>📖</span> Tell a Story
+            <i class="fas fa-book"></i> Tell a Story
           </button>
           <button class="action-button">
-            <span>🎙️</span> Intoduce a Podcast
+            <i class="fas fa-podcast"></i> Introduce a Podcast
           </button>
           <button class="action-button">
-            <span>🎬</span> Create a video voiceover
+            <i class="fas fa-video"></i> Create a video voiceover
           </button>
         </div>
 
@@ -1264,7 +1406,7 @@
                 <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/us.svg" alt="English" class="flag-icon">
               </div>
               <span>English</span>
-              <span class="dropdown-arrow">▼</span>
+              <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
               <div class="language-dropdown">
                 <div class="language-option">
                   <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/us.svg" alt="English" class="flag-icon">
@@ -1293,7 +1435,7 @@
                 <img src="https://api.dicebear.com/7.x/bottts/svg?seed=brian" alt="Brian" class="avatar-icon">
               </div>
               <span>BRIAN</span>
-              <span class="dropdown-arrow">▼</span>
+              <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
               <div class="voice-model-dropdown">
                 <div class="voice-model-option">
                   <div class="voice-avatar">
@@ -1348,13 +1490,13 @@
         
         <div class="voice-actions">
           <button class="action-button">
-            <span>🔔</span> Create Notification
+            <i class="fas fa-bell"></i> Create Notification
           </button>
           <button class="action-button">
-            <span>🎮</span> Game Sound
+            <i class="fas fa-gamepad"></i> Game Sound
           </button>
           <button class="action-button">
-            <span>🎵</span> Musical Effect
+            <i class="fas fa-music"></i> Musical Effect
           </button>
         </div>
 
@@ -1365,7 +1507,7 @@
                 <img src="https://api.dicebear.com/7.x/bottts/svg?seed=effect" alt="Effect" class="avatar-icon">
               </div>
               <span>Notification</span>
-              <span class="dropdown-arrow">▼</span>
+              <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
               <div class="voice-model-dropdown">
                 <div class="voice-model-option">
                   <div class="voice-avatar">
@@ -1408,10 +1550,10 @@
 
         <div class="voice-actions">
           <button class="action-button">
-            <span>🎤</span> Record Voice
+            <i class="fas fa-microphone"></i> Record Voice
           </button>
           <button class="action-button">
-            <span>📁</span> Upload Audio
+            <i class="fas fa-upload"></i> Upload Audio
           </button>
         </div>
 
@@ -1452,10 +1594,10 @@
 
         <div class="voice-actions">
           <button class="action-button">
-            <span>🎤</span> Record Voice
+            <i class="fas fa-microphone"></i> Record Voice
           </button>
           <button class="action-button">
-            <span>📁</span> Upload Audio
+            <i class="fas fa-upload"></i> Upload Audio
           </button>
         </div>
 
@@ -1467,7 +1609,7 @@
                 <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/us.svg" alt="English" class="flag-icon">
               </div>
               <span>English</span>
-              <span class="dropdown-arrow">▼</span>
+              <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
               <div class="language-dropdown">
                 <div class="language-option">
                   <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/us.svg" alt="English" class="flag-icon">
@@ -1515,7 +1657,7 @@
             <label class="gguf-checkbox">
               <input type="checkbox" checked>
               <span>GGUF</span>
-              <span class="info-icon">ⓘ</span>
+              <span class="info-icon"><i class="fas fa-info-circle"></i></span>
             </label>
             <button class="expand-button">⤢</button>
             <button class="close-button">×</button>
@@ -1572,8 +1714,8 @@
                 <div class="meta-item">
                   <span class="meta-label">Stats:</span>
                   <div class="stats-group">
-                    <span>❤️ 20</span>
-                    <span>⬇️ 104061</span>
+                    <span><i class="fas fa-heart"></i> 20</span>
+                    <span><i class="fas fa-download"></i> 104061</span>
                   </div>
                 </div>
                 <div class="meta-item">
@@ -1587,7 +1729,7 @@
             <div class="download-section">
               <div class="download-header">
                 <span>4 download options available</span>
-                <span class="info-icon">ⓘ</span>
+                <span class="info-icon"><i class="fas fa-info-circle"></i></span>
               </div>
               <div class="download-item">
                 <div class="file-info">
@@ -1595,10 +1737,10 @@
                   <span class="model-name">Qwen2.5 7B Instruct 1M</span>
                 </div>
                 <div class="file-actions">
-                  <button class="copy-btn">📋</button>
-                  <button class="like-btn">👍</button>
+                  <button class="copy-btn"><i class="fas fa-clipboard"></i></button>
+                  <button class="like-btn"><i class="fas fa-thumbs-up"></i></button>
                   <span class="file-size">4.68 GB</span>
-                  <button class="expand-btn">▼</button>
+                  <button class="expand-btn"><i class="fas fa-chevron-down"></i></button>
                 </div>
               </div>
             </div>
@@ -1610,9 +1752,8 @@
                 <span class="source-text">Pulled from the model's repository</span>
               </div>
               <div class="readme-content">
-                <h2>🤖 Community Model> Qwen2.5 7B Instruct 1M by Qwen</h2>
-                <p>🦙 LM Studio Community models highlights program. Highlighting new & noteworthy models by the community.</p>
-                <p>Join the conversation on Discord.</p>
+                <h2><i class="fas fa-robot"></i> Community Model> Qwen2.5 7B Instruct 1M by Qwen</h2>
+                <p><i class="fas fa-alpaca"></i> LM Studio Community models highlights program...</p>
                 
                 <div class="model-info">
                   <p><strong>Model creator:</strong> Qwen</p>
@@ -1636,7 +1777,7 @@
 
         <div class="voice-actions">
           <button class="action-button">
-            <span>📈</span> Performance
+            <i class="fas fa-chart-line"></i> Performance
           </button>
         </div>
 
@@ -1675,16 +1816,16 @@
             <h1>System Resources</h1>
             <div class="header-actions">
               <button class="header-button">
-                <span>📋</span> Copy Info
+                <i class="fas fa-clipboard"></i> Copy Info
               </button>
               <button class="header-button">
-                <span>👥</span> Community
+                <i class="fas fa-users"></i> Community
               </button>
               <button class="header-button expand">
-                <span>⤢</span>
+                <i class="fas fa-expand"></i>
               </button>
               <button class="header-button close">
-                <span>×</span>
+                <i class="fas fa-times"></i>
               </button>
             </div>
           </div>
@@ -1694,21 +1835,20 @@
           <!-- CPU Section -->
           <div class="info-card">
             <div class="info-header">
-              <h2>CPU <span class="info-icon">ⓘ</span></h2>
-              <span class="compatibility-badge">✓ Compatible</span>
+              <h2>CPU <span class="info-icon"><i class="fas fa-info-circle"></i></span></h2>
+              <span class="compatibility-badge">Checking...</span>
             </div>
             <div class="info-content">
               <div class="info-row">
                 <span class="info-label">Architecture</span>
                 <span class="info-value">
-                  <span class="chip-badge">x86_64</span>
+                  <span class="chip-badge">Loading...</span>
                 </span>
               </div>
               <div class="info-row">
                 <span class="info-label">Instruction Set Extensions</span>
                 <div class="chip-group">
-                  <span class="chip-badge">AVX</span>
-                  <span class="chip-badge">AVX2</span>
+                  <!-- Will be populated by JS -->
                 </div>
               </div>
             </div>
@@ -1717,17 +1857,17 @@
           <!-- GPUs Section -->
           <div class="info-card">
             <div class="info-header">
-              <h2>GPUs <span class="info-icon">ⓘ</span></h2>
-              <span class="gpu-count">1 GPU detected</span>
+              <h2>GPUs <span class="info-icon"><i class="fas fa-info-circle"></i></span></h2>
+              <span class="gpu-count">Detecting GPUs...</span>
             </div>
             <div class="info-content">
               <div class="info-row">
-                <span class="gpu-model">NVIDIA GeForce GTX 1650</span>
-                <span class="chip-badge cuda">CUDA</span>
+                <span class="gpu-model">Loading GPU info...</span>
+                <span class="chip-badge cuda">-</span>
               </div>
               <div class="info-row">
                 <span class="info-label">VRAM Capacity</span>
-                <span class="info-value">4.00 GB</span>
+                <span class="info-value">-</span>
               </div>
             </div>
           </div>
@@ -1735,16 +1875,16 @@
           <!-- Memory Capacity Section -->
           <div class="info-card">
             <div class="info-header">
-              <h2>Memory Capacity <span class="info-icon">ⓘ</span></h2>
+              <h2>Memory Capacity <span class="info-icon"><i class="fas fa-info-circle"></i></span></h2>
             </div>
             <div class="info-content">
               <div class="info-row">
                 <span class="info-label">RAM</span>
-                <span class="info-value">15.85 GB</span>
+                <span class="info-value">-</span>
               </div>
               <div class="info-row">
                 <span class="info-label">VRAM</span>
-                <span class="info-value">4.00 GB</span>
+                <span class="info-value">-</span>
               </div>
             </div>
           </div>
@@ -1752,7 +1892,7 @@
           <!-- Guardrails Section -->
           <div class="info-card">
             <div class="info-header">
-              <h2>Guardrails <span class="info-icon">ⓘ</span></h2>
+              <h2>Guardrails <span class="info-icon"><i class="fas fa-info-circle"></i></span></h2>
             </div>
             <div class="info-content">
               <div class="info-row">
@@ -1761,7 +1901,7 @@
               <div class="guardrail-selector">
                 <div class="selected-guardrail">
                   <span>Strict</span>
-                  <span class="dropdown-arrow">▼</span>
+                  <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
                 </div>
                 <p class="guardrail-description">Strong precautions against system overload</p>
               </div>
@@ -1777,11 +1917,11 @@
             <div class="monitor-grid">
               <div class="monitor-card">
                 <span class="monitor-label">RAM + VRAM</span>
-                <span class="monitor-value">0 GB</span>
+                <span class="monitor-value">-</span>
               </div>
               <div class="monitor-card">
                 <span class="monitor-label">CPU</span>
-                <span class="monitor-value">0.00%</span>
+                <span class="monitor-value">-</span>
               </div>
             </div>
           </div>
