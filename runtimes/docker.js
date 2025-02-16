@@ -1,6 +1,23 @@
 const { exec } = require('child_process');
+const path = require('path');
+const fs = require('fs').promises;
 
 class DockerManager {
+    static async getInstallScript() {
+        const scriptsPath = path.join(__dirname, 'scripts');
+        
+        switch (process.platform) {
+            case 'win32':
+                return path.join(scriptsPath, 'docker_win.bat');
+            case 'darwin':
+                return path.join(scriptsPath, 'docker_macos.sh');
+            case 'linux':
+                return path.join(scriptsPath, 'docker_linux.sh');
+            default:
+                throw new Error('Unsupported platform');
+        }
+    }
+
     // Check if Docker is installed
     static checkInstallation() {
         return new Promise((resolve) => {
@@ -10,22 +27,53 @@ class DockerManager {
         });
     }
 
-    // Install Docker (basic implementation - can be expanded)
-    static installDocker() {
-        return new Promise((resolve, reject) => {
-            // This is a basic example - you'll want to adjust based on OS
-            const command = process.platform === 'win32'
-                ? 'powershell -Command "Start-Process powershell -Verb RunAs -ArgumentList \'-Command Install-Module DockerMsftProvider -Force; Install-Package Docker -ProviderName DockerMsftProvider -Force\'"'
-                : 'curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh';
-
-            exec(command, (error, stdout, stderr) => {
-                if (error) {
-                    reject(new Error(`Docker installation failed: ${error.message}`));
-                    return;
-                }
-                resolve(true);
+    static async checkWingetInstallation() {
+        return new Promise((resolve) => {
+            exec('winget --version', (error) => {
+                resolve(!error);
             });
         });
+    }
+
+    // Install Docker using platform-specific scripts
+    static async installDocker() {
+        try {
+            const scriptPath = await this.getInstallScript();
+            
+            // Make script executable on Unix-like systems
+            if (process.platform !== 'win32') {
+                await fs.chmod(scriptPath, '755');
+            }
+
+            return new Promise((resolve, reject) => {
+                const command = process.platform === 'win32' 
+                    ? scriptPath 
+                    : `sh "${scriptPath}"`;
+
+                const proc = exec(command, (error, stdout, stderr) => {
+                    if (error) {
+                        reject(new Error(`Docker installation failed: ${error.message}`));
+                        return;
+                    }
+                    console.log('Installation output:', stdout);
+                    if (stderr) console.error('Installation warnings:', stderr);
+                    resolve(true);
+                });
+
+                // Log real-time output
+                proc.stdout.on('data', (data) => {
+                    console.log('Installation progress:', data);
+                    // You can emit these events through IPC if needed
+                });
+
+                proc.stderr.on('data', (data) => {
+                    console.error('Installation warning:', data);
+                    // You can emit these events through IPC if needed
+                });
+            });
+        } catch (error) {
+            throw new Error(`Failed to execute installation script: ${error.message}`);
+        }
     }
 
     // Check Docker service status
