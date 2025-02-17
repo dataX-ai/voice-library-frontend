@@ -7,4 +7,5 @@ fi
 
 # Install Docker Desktop for Mac
 echo "Installing Docker Desktop..."
-brew install --cask docker 
+brew install --cask docker
+open /Applications/Docker.app 

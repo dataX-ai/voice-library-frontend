@@ -3,54 +3,158 @@ const path = require('path');
 const fs = require('fs').promises;
 
 class DockerManager {
-    static async getInstallScript() {
-        const scriptsPath = path.join(__dirname, 'scripts');
-        
-        switch (process.platform) {
-            case 'win32':
-                return path.join(scriptsPath, 'docker_win.bat');
-            case 'darwin':
-                return path.join(scriptsPath, 'docker_macos.sh');
-            case 'linux':
-                return path.join(scriptsPath, 'docker_linux.sh');
-            default:
-                throw new Error('Unsupported platform');
+
+    static runPrivilegedCommand(command, callback) {
+        if (process.platform === 'linux') {
+            // Linux: Use pkexec for GUI password prompt
+            exec(`pkexec ${command}`, (error, stdout, stderr) => {
+                callback(error, stdout, stderr);
+            });
+        } else if (process.platform === 'darwin') {
+            // macOS: Use osascript elevation
+            exec(`osascript -e 'do shell script "${command}" with administrator privileges'`, 
+                callback);
+        } else if (process.platform === 'win32') {
+            // Windows: Execute normally as the script handles elevation internally
+            exec(command, callback);
         }
     }
 
-    // Check if Docker is installed
-    static checkInstallation() {
-        return new Promise((resolve) => {
-            exec('docker --version', (error) => {
-                resolve(!error);
-            });
-        });
+    static async getScriptPath(scriptName) {
+        const scriptsPath = path.join(__dirname, 'scripts');
+        const scriptPath = path.join(scriptsPath, scriptName);
+        
+        try {
+            // Only handle ASAR unpacking and permissions for Linux
+            if (process.platform === 'linux') {
+                // Check if we're running from an ASAR archive
+                const isAsar = scriptPath.includes('app.asar');
+                const finalPath = isAsar ? scriptPath.replace('app.asar', 'app.asar.unpacked') : scriptPath;
+                
+                try {
+                    await fs.chmod(finalPath, '755');
+                } catch (error) {
+                    console.warn(`Warning: Could not set executable permissions on ${finalPath}`, error);
+                    // Continue execution as the file might already be executable
+                }
+                
+                // Verify the script exists
+                await fs.access(finalPath);
+                return finalPath;
+            }
+            
+            // For Windows and macOS, just return the direct path
+            return scriptPath;
+        } catch (error) {
+            console.error(`Failed to prepare script ${scriptName}:`, error);
+            throw new Error(`Script not found: ${scriptName}. Make sure all required files are included in your project.`);
+        }
     }
 
-    static async checkWingetInstallation() {
-        return new Promise((resolve) => {
-            exec('winget --version', (error) => {
-                resolve(!error);
+    static async getInstallScript() {
+        const scriptName = (() => {
+            switch (process.platform) {
+                case 'win32': return 'docker_install_win.bat';
+                case 'darwin': return 'docker_install_macos.sh';
+                case 'linux': return 'docker_install_linux.sh';
+                default: throw new Error('Unsupported platform');
+            }
+        })();
+        
+        return this.getScriptPath(scriptName);
+    }
+
+    static async getDockerCheckScript() {
+        const scriptName = (() => {
+            switch (process.platform) {
+                case 'win32': return 'docker_check_win.bat';
+                case 'darwin': return 'docker_check_macos.sh';
+                case 'linux': return 'docker_check_linux.sh';
+                default: throw new Error('Unsupported platform');
+            }
+        })();
+        
+        return this.getScriptPath(scriptName);
+    }
+
+    // Check if Docker is installed
+    static async checkInstallation() {
+        try {
+            const scriptPath = await this.getDockerCheckScript();
+            let installed = false;
+            let running = false;
+
+            return new Promise((resolve, reject) => {
+                const command = process.platform === 'win32'
+                    ? scriptPath
+                    : `sh "${scriptPath}"`;
+
+                const proc = exec(command, (error, stdout, stderr) => {
+                    if (error) {
+                        reject(new Error(`Docker check failed: ${error.message}`));
+                        return;
+                    }
+                    console.log('Docker check output:', stdout);
+                    const lines = stdout.trim().split('\n');
+
+                    lines.forEach(line => {
+                        line = line.trim();
+                        if (line === 'NOT INSTALLED') {
+                            installed = false;
+                            running = false;
+                        } else if (line === 'NOT RUNNING') {
+                            installed = true;
+                            running = false;
+                        } else if (line === 'RUNNING') {
+                            installed = true;
+                            running = true;
+                        }
+                    });
+
+                    console.log('Docker status:', { installed, running });
+                    resolve({ installed, running });
+                });
+
+                // Log real-time output
+                proc.stdout.on('data', (data) => {
+                    console.log('Docker check output:', data);
+                    const lines = data.toString().split('\n');
+                    lines.forEach(line => {
+                        line = line.trim();
+                        if (line === 'NOT INSTALLED') {
+                            installed = false;
+                            running = false;
+                        } else if (line === 'NOT RUNNING') {
+                            installed = true;
+                            running = false;
+                        } else if (line === 'RUNNING') {
+                            installed = true;
+                            running = true;
+                        }
+                    });
+                });
+
+                proc.on('close', (code) => {
+                    console.log('Docker status:', { installed, running });
+                    resolve({ installed, running });
+                });
             });
-        });
+        } catch (error) {
+            throw new Error(`Failed to execute Docker check script: ${error.message}`);
+        }
     }
 
     // Install Docker using platform-specific scripts
     static async installDocker() {
         try {
             const scriptPath = await this.getInstallScript();
-            
-            // Make script executable on Unix-like systems
-            if (process.platform !== 'win32') {
-                await fs.chmod(scriptPath, '755');
-            }
 
             return new Promise((resolve, reject) => {
-                const command = process.platform === 'win32' 
-                    ? scriptPath 
+                const command = process.platform === 'win32'
+                    ? scriptPath
                     : `sh "${scriptPath}"`;
 
-                const proc = exec(command, (error, stdout, stderr) => {
+                this.runPrivilegedCommand(command, (error, stdout, stderr) => {
                     if (error) {
                         reject(new Error(`Docker installation failed: ${error.message}`));
                         return;
@@ -58,17 +162,6 @@ class DockerManager {
                     console.log('Installation output:', stdout);
                     if (stderr) console.error('Installation warnings:', stderr);
                     resolve(true);
-                });
-
-                // Log real-time output
-                proc.stdout.on('data', (data) => {
-                    console.log('Installation progress:', data);
-                    // You can emit these events through IPC if needed
-                });
-
-                proc.stderr.on('data', (data) => {
-                    console.error('Installation warning:', data);
-                    // You can emit these events through IPC if needed
                 });
             });
         } catch (error) {
@@ -105,6 +198,8 @@ class DockerManager {
             });
         });
     }
+
+
 }
 
 module.exports = DockerManager; 
