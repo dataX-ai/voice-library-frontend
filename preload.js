@@ -7,8 +7,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getPerformanceStats: () => ipcRenderer.invoke('get-performance-stats'),
     selectDirectory: () => ipcRenderer.invoke('select-directory'),
     listModels: (directory) => ipcRenderer.invoke('list-models', directory),
-    switchContent: (contentType) => ipcRenderer.send('switch-content', contentType)
-});
-
-// Add this to allow fetch in the renderer process
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; 
+    switchContent: (contentType) => ipcRenderer.send('switch-content', contentType),
+    checkDocker: () => ipcRenderer.invoke('check-docker'),
+    installDocker: () => ipcRenderer.invoke('install-docker'),
+    getDockerStatus: () => ipcRenderer.invoke('docker-status'),
+    getDockerVersion: () => ipcRenderer.invoke('docker-version')
+}); 
