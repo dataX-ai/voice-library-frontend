@@ -254,7 +254,7 @@ async function checkPolkitRules() {
 
     try {
         const rulesPath = '/etc/polkit-1/rules.d/50-docker.rules';
-        const sourceRulesPath = path.join(__dirname, 'installers', '50-docker.rules';
+        const sourceRulesPath = path.join(__dirname, 'installers', '50-docker.rules');
         
         const rulesExist = await fs.access(rulesPath)
             .then(() => true)
