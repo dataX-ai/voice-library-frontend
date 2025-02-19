@@ -11,5 +11,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     checkDocker: () => ipcRenderer.invoke('check-docker'),
     installDocker: () => ipcRenderer.invoke('install-docker'),
     getDockerStatus: () => ipcRenderer.invoke('docker-status'),
-    getDockerVersion: () => ipcRenderer.invoke('docker-version')
+    getDockerVersion: () => ipcRenderer.invoke('docker-version'),
+    runDockerCheck: () => ipcRenderer.invoke('run-docker-check')
 }); 

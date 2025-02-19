@@ -1,0 +1,15 @@
+text=auto
+*.txt text
+*.html text
+*.js text
+*.css text
+*.java text
+*.py text
+*.sh text
+*.md text
+
+# Ensure binary files are not converted
+*.png binary
+*.jpg binary
+*.gif binary
+*.pdf binary

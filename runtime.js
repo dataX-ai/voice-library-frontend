@@ -3,13 +3,33 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeRuntimePage();
 });
 
+async function checkDockerInstallation() {
+    try {
+        const result = await window.electronAPI.runDockerCheck();
+        return result;
+    } catch (error) {
+        console.error('Error running Docker check script:', error);
+        throw error;
+    }
+}
+
+function createLoadingAnimation() {
+    const loadingContainer = document.createElement('div');
+    loadingContainer.className = 'loading-container';
+    loadingContainer.innerHTML = `
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Installing Docker...</div>
+    `;
+    return loadingContainer;
+}
+
 function initializeRuntimePage() {
     // This function will be used to initialize any runtime-specific functionality
     console.log('Runtime page initialized');
     
     // Get the check docker button
     const checkDockerButton = document.querySelector('.check-docker');
-    const dockerStatus = document.querySelector('.docker-status');
+    const dockerStatusElement = document.querySelector('.docker-status');
     const terminal = document.querySelector('.terminal-window');
     const terminalOutput = document.querySelector('.terminal-output');
     
@@ -38,37 +58,27 @@ function initializeRuntimePage() {
                 terminal.classList.add('active');
                 terminalOutput.innerHTML = ''; // Clear previous output
                 
-                appendToTerminal('$ Checking Docker installation...', 'command');
+                // appendToTerminal('$ Running Docker check script...', 'command');
                 
-                // Check Docker installation
-                const isDockerInstalled = await window.electronAPI.checkDocker();
+                // Check Docker installation using script
+                const dockerStatus = await checkDockerInstallation();
                 
-                if (isDockerInstalled) {
-                    // If installed, get additional info
-                    const isRunning = await window.electronAPI.getDockerStatus();
+                if (dockerStatus.installed) {
+
                     let statusMessage = '✅ Docker is installed';
-                    
                     appendToTerminal(statusMessage, 'info');
-                    
-                    if (isRunning) {
-                        try {
-                            appendToTerminal('$ Checking Docker version...', 'command');
-                            const versionInfo = await window.electronAPI.getDockerVersion();
-                            statusMessage += ` and running (Version: ${versionInfo.Server.Version})`;
-                            appendToTerminal(`Docker version: ${versionInfo.Server.Version}`, 'info');
-                        } catch (e) {
-                            statusMessage += ' and running';
-                            appendToTerminal('Unable to get Docker version', 'error');
-                        }
+
+                    let serviceMessage;
+                    if (dockerStatus.running) {
+                        serviceMessage = '✅ Docker Daemon is running';
+                        appendToTerminal(serviceMessage, 'info');
                     } else {
-                        statusMessage += ' but not running';
+                        serviceMessage = '❌ Docker Daemon is not running';
                         appendToTerminal('Docker is not running', 'error');
                     }
-                    
-                    dockerStatus.innerHTML = `<div class="status-message success">${statusMessage}</div>`;
                 } else {
-                    appendToTerminal('Docker is not installed', 'error');
-                    dockerStatus.innerHTML = `
+                    appendToTerminal(dockerStatus.error || 'Docker is not installed', 'error');
+                    dockerStatusElement.innerHTML = `
                         <div class="status-message error">❌ Docker is not installed
                             <button class="action-button install-docker">
                                 <span>🐳</span> Install Docker
@@ -76,17 +86,46 @@ function initializeRuntimePage() {
                         </div>`;
                     
                     // Add install button listener
-                    const installButton = dockerStatus.querySelector('.install-docker');
+                    const installButton = dockerStatusElement.querySelector('.install-docker');
                     if (installButton) {
                         installButton.addEventListener('click', async () => {
                             try {
+                                // Create and show loading animation
+                                const loadingAnimation = createLoadingAnimation();
+                                dockerStatusElement.appendChild(loadingAnimation);
+                                installButton.disabled = true;
+
+                                // Start a loading message update loop
+                                let dots = '';
+                                const loadingText = loadingAnimation.querySelector('.loading-text');
+                                const loadingInterval = setInterval(() => {
+                                    dots = dots.length >= 3 ? '' : dots + '.';
+                                    loadingText.textContent = `Installing Docker${dots}`;
+                                }, 500);
+
                                 appendToTerminal('$ Starting Docker installation...', 'command');
+                                
+                                // Start installation
                                 await window.electronAPI.installDocker();
+                                
+                                // Clear loading animation
+                                clearInterval(loadingInterval);
+                                loadingAnimation.remove();
+                                installButton.disabled = false;
+
                                 appendToTerminal('Docker installation completed successfully', 'info');
-                                dockerStatus.innerHTML = '<div class="status-message success">✅ Docker installation initiated</div>';
+                                dockerStatusElement.innerHTML = '<div class="status-message success">✅ Docker installation completed</div>';
+                                
+                                // Trigger a Docker check after installation
+                                await checkDockerInstallation();
                             } catch (error) {
+                                // Clear loading animation on error too
+                                clearInterval(loadingInterval);
+                                loadingAnimation?.remove();
+                                installButton.disabled = false;
+
                                 appendToTerminal(`Installation failed: ${error.message}`, 'error');
-                                dockerStatus.innerHTML = `<div class="status-message error">❌ Docker installation failed: ${error.message}</div>`;
+                                dockerStatusElement.innerHTML = `<div class="status-message error">❌ Docker installation failed: ${error.message}</div>`;
                             }
                         });
                     }
@@ -95,7 +134,7 @@ function initializeRuntimePage() {
             } catch (error) {
                 console.error('Error checking Docker:', error);
                 appendToTerminal(`Error: ${error.message}`, 'error');
-                dockerStatus.innerHTML = '<div class="status-message error">❌ Error checking Docker installation</div>';
+                dockerStatusElement.innerHTML = '<div class="status-message error">❌ Error checking Docker installation</div>';
             }
         });
     }

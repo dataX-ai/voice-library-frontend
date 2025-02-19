@@ -39,12 +39,21 @@ function createWindow() {
     win.webContents.openDevTools();
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+    // Install polkit rules before creating window
+    if (process.platform === 'linux') {
+        try {
+            await checkPolkitRules();
+        } catch (error) {
+            console.error('Failed to check polkit rules:', error);
+        }
+    }
+    
     createWindow();
 
     app.on('activate', function () {
-        if (BrowserWindow.getAllWindows().length === 0) createWindow()
-    })
+        if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
 });
 
 app.on('window-all-closed', function () {
@@ -227,4 +236,49 @@ ipcMain.handle('docker-version', async () => {
         console.error('Error getting Docker version:', error);
         throw error;
     }
-}); 
+});
+
+ipcMain.handle('run-docker-check', async () => {
+    try {
+        const status = await DockerManager.checkInstallation();
+        
+        return status;
+    } catch (error) {
+        console.error('Docker check error:', error);
+        throw error;
+    }
+});
+
+// Replace the existing checkPolkitRules function
+async function checkPolkitRules() {
+    if (process.platform !== 'linux') return;
+
+    try {
+        const rulesPath = '/etc/polkit-1/rules.d/50-docker.rules';
+        const sourceRulesPath = path.join(__dirname, 'installers', '50-docker.rules');
+        
+        const rulesExist = await fs.access(rulesPath)
+            .then(() => true)
+            .catch(() => false);
+        
+        if (!rulesExist) {
+            console.log('Polkit rules not found, installing...');
+            // Copy rules file to system location with elevated privileges
+            await new Promise((resolve, reject) => {
+                const command = `pkexec cp "${sourceRulesPath}" "${rulesPath}" && pkexec chmod 644 "${rulesPath}"`;
+                exec(command, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error('Failed to install polkit rules:', error);
+                        reject(error);
+                        return;
+                    }
+                    console.log('Successfully installed polkit rules');
+                    resolve();
+                });
+            });
+        }
+    } catch (error) {
+        console.error('Error checking/installing polkit rules:', error);
+        throw error;
+    }
+} 

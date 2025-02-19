@@ -1,21 +1,65 @@
 {
-  "name": "my-electron-app",
+  "name": "voice-studio",
   "version": "1.0.0",
-  "description": "",
+  "description": "Voice Studio - AI Voice Generation Tool",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "dev": "electron . --watch"
+    "dev": "electron . --watch",
+    "dev-linux": "electron . --watch --linux --no-sandbox",
+    "build": "electron-builder",
+    "postinstall": "node installers/setup.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["voice", "ai", "studio"],
+  "author": {
+    "name": "Euler Labs",
+    "email": "kanishka@ateulerlabs.com"
+  },
   "license": "ISC",
   "devDependencies": {
-    "electron": "^34.1.1",
-    "electron-reloader": "^1.2.3"
+    "electron": "^34.2.0",
+    "electron-reloader": "^1.2.3",
+    "electron-builder": "^24.9.1"
   },
   "dependencies": {
     "systeminformation": "^5.25.11"
+  },
+  "build": {
+    "appId": "com.voicestudio.app",
+    "productName": "VoiceStudio",
+    "linux": {
+      "target": ["deb"],
+      "category": "AudioVideo",
+      "desktop": {
+        "StartupWMClass": "voice-studio"
+      },
+      "maintainer": "Euler Labs Team <kanishka@ateulerlabs.com>",
+      "executableName": "voice-studio",
+      "artifactName": "${productName}-${version}.${ext}"
+    },
+    "win": {
+      "target": ["nsis"],
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "icon": "build/icon.ico"
+    },
+    "deb": {
+      "afterInstall": "installers/linux-post-install.sh"
+    },
+    "extraFiles": [
+      {
+        "from": "installers/50-docker.rules",
+        "to": "resources/50-docker.rules",
+        "filter": ["**/*"]
+      }
+    ],
+    "files": [
+      "**/*",
+      "installers/50-docker.rules"
+    ],
+    "asarUnpack": [
+      "installers/50-docker.rules",
+      "runtimes/scripts/*"
+    ]
   }
 }
