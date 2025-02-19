@@ -26,7 +26,7 @@ class DockerManager {
         
         try {
             // Only handle ASAR unpacking and permissions for Linux
-            if (process.platform === 'linux') {
+            if (process.platform === 'linux' || process.platform === 'win32') {
                 // Check if we're running from an ASAR archive
                 const isAsar = scriptPath.includes('app.asar');
                 const finalPath = isAsar ? scriptPath.replace('app.asar', 'app.asar.unpacked') : scriptPath;

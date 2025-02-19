@@ -28,7 +28,7 @@ if [ -z "$DOCKER_PATH" ]; then
     exit 0
 fi
 
-# Check Docker daemon status (without pkexec since we have polkit rules)
+
 if ! docker info &> /dev/null; then
     # Try to start Docker daemon (without pkexec)
     if systemctl start docker &> /dev/null; then

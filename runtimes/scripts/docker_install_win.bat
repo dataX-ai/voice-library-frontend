@@ -39,7 +39,7 @@ if !ERRORLEVEL! EQU 0 (
             winget install Docker.DockerDesktop
         ) else (
             echo Winget is not installed. Using direct download...
-            %POWERSHELL_PATH% -Command "$installerUrl = 'https://desktop.docker.com/win/main/amd64/Docker Desktop Installer.exe'; $installerPath = Join-Path $env:TEMP 'DockerDesktopInstaller.exe'; Write-Host 'Downloading Docker Desktop...'; Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath; Write-Host 'Installing Docker Desktop...'; Start-Process -FilePath $installerPath -ArgumentList 'install', '--quiet' -Wait; Write-Host 'Installation complete.'"
+            %POWERSHELL_PATH% -Command "$installerUrl = 'https://desktop.docker.com/win/main/amd64/Docker Desktop Installer.exe'; $installerPath = Join-Path $env:TEMP 'DockerDesktopInstaller.exe'; Write-Host 'Downloading Docker Desktop...'; Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath; Write-Host 'Installing Docker Desktop...'; Start-Process -FilePath $installerPath -ArgumentList 'install', '--quiet', '--always-run-service' -Wait; Write-Host 'Installation complete.'"
         )
         
         echo Adding Docker to PATH...

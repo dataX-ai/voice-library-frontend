@@ -38,6 +38,11 @@
       "executableName": "voice-studio",
       "artifactName": "${productName}-${version}.${ext}"
     },
+    "win": {
+      "target": ["nsis"],
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "icon": "build/icon.ico"
+    },
     "deb": {
       "afterInstall": "installers/linux-post-install.sh"
     },
