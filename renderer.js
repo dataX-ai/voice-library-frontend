@@ -47,6 +47,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.querySelector('.system-info').classList.add('active');
             } else if (optionText.includes('Runtimes')) {
                 document.querySelector('.runtimes').classList.add('active');
+            } else if (optionText.includes('My Models')) {
+                document.querySelector('.my-models').classList.add('active');
             }
 
             // Close the dropdown after selection
@@ -193,6 +195,63 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     `;
     document.head.appendChild(style);
+
+    // Handle model filtering
+    const modelFilterInput = document.getElementById('modelFilterInput');
+    if (modelFilterInput) {
+        modelFilterInput.addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            document.querySelectorAll('.model-item').forEach(item => {
+                const modelName = item.querySelector('h3').textContent.toLowerCase();
+                if (modelName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Handle model actions
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const modelItem = this.closest('.model-item');
+            const modelName = modelItem.querySelector('h3').textContent;
+            const action = this.querySelector('span').textContent.toLowerCase();
+
+            switch (action) {
+                case 'stop':
+                    modelItem.querySelector('.model-status').textContent = 'Stopped';
+                    modelItem.querySelector('.model-status').classList.remove('running');
+                    modelItem.querySelector('.model-status').classList.add('stopped');
+                    this.innerHTML = '<i class="fas fa-play"></i><span>Start</span>';
+                    this.classList.remove('stop-btn');
+                    this.classList.add('start-btn');
+                    break;
+                case 'start':
+                    modelItem.querySelector('.model-status').textContent = 'Running';
+                    modelItem.querySelector('.model-status').classList.remove('stopped');
+                    modelItem.querySelector('.model-status').classList.add('running');
+                    this.innerHTML = '<i class="fas fa-stop"></i><span>Stop</span>';
+                    this.classList.remove('start-btn');
+                    this.classList.add('stop-btn');
+                    break;
+                case 'restart':
+                    // Add restart animation
+                    this.querySelector('i').style.animation = 'spin 1s linear';
+                    setTimeout(() => {
+                        this.querySelector('i').style.animation = '';
+                    }, 1000);
+                    break;
+                case 'delete':
+                    if (confirm(`Are you sure you want to delete ${modelName}?`)) {
+                        modelItem.remove();
+                    }
+                    break;
+            }
+        });
+    });
 });
 
 // Handle slider value updates

@@ -1495,6 +1495,200 @@
         font-size: 12px;
         margin-bottom: 8px;
       }
+
+      /* My Models Page Styles */
+      .my-models {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background: #f8f9fa;
+        display: none;  /* Hide by default */
+      }
+
+      .my-models.active {
+        display: flex;  /* Show when active */
+      }
+
+      .models-header {
+        position: sticky;
+        top: 0;
+        background: white;
+        padding: 16px;
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 10;
+      }
+
+      .models-header .search-container {
+        max-width: 100%;
+      }
+
+      .models-header .search-bar {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .models-header .search-bar i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+      }
+
+      .models-header input {
+        width: 100%;
+        padding: 8px 12px 8px 36px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      .models-list {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .model-item {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s ease;
+      }
+
+      .model-item:hover {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transform: translateY(-1px);
+      }
+
+      .model-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .model-icon {
+        width: 40px;
+        height: 40px;
+        background: #f3f4f6;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6366f1;
+      }
+
+      .model-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .model-details h3 {
+        font-size: 16px;
+        font-weight: 500;
+        color: #111827;
+        margin: 0;
+      }
+
+      .model-status {
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 12px;
+        width: fit-content;
+      }
+
+      .model-status.running {
+        background: #dcfce7;
+        color: #16a34a;
+      }
+
+      .model-status.stopped {
+        background: #fee2e2;
+        color: #dc2626;
+      }
+
+      .model-status.downloaded {
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+
+      .model-status.loaded {
+        background: #ecfdf5;
+        color: #059669;
+      }
+
+      .model-meta {
+        font-size: 12px;
+        color: #6b7280;
+      }
+
+      .model-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .action-btn {
+        padding: 6px 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        background: white;
+        color: #374151;
+        font-size: 13px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+      }
+
+      .action-btn:hover {
+        background: #f9fafb;
+      }
+
+      .action-btn.stop-btn:hover {
+        background: #fee2e2;
+        color: #dc2626;
+        border-color: #fecaca;
+      }
+
+      .action-btn.restart-btn:hover {
+        background: #e0e7ff;
+        color: #4f46e5;
+        border-color: #c7d2fe;
+      }
+
+      .action-btn.delete-btn:hover {
+        background: #fee2e2;
+        color: #dc2626;
+        border-color: #fecaca;
+      }
+
+      .action-btn.start-btn:hover {
+        background: #dcfce7;
+        color: #16a34a;
+        border-color: #c7d2fe;
+      }
+
+      .model-actions i {
+        font-size: 14px;
+      }
+
+      /* Optional: Add different icon colors for different models */
+      .model-item:nth-child(2) .model-icon {
+        color: #8b5cf6;  /* Purple for Mistral */
+      }
+
+      .model-item:nth-child(3) .model-icon {
+        color: #ea580c;  /* Orange for Phi */
+      }
     </style>
   </head>
   <body>
@@ -1519,8 +1713,7 @@
       <div class="sidebar-icon folder">
         <i class="fas fa-folder"></i>
         <div class="voice-dropdown">
-          <div class="voice-option"><i class="fas fa-folder-open"></i> Browse Files</div>
-          <div class="voice-option"><i class="fas fa-save"></i> Save Location</div>
+          <div class="voice-option"><i class="fas fa-folder-open"></i> My Models</div>
         </div>
       </div>
       <div class="sidebar-icon search">
@@ -2060,6 +2253,95 @@
             </div>
             <div class="terminal-content">
               <div class="terminal-output"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="voice-content my-models">
+        <div class="models-header">
+          <div class="search-container">
+            <div class="search-bar">
+              <i class="fas fa-search"></i>
+              <input type="text" placeholder="Filter models..." id="modelFilterInput">
+            </div>
+          </div>
+        </div>
+        
+        <div class="models-list">
+          <!-- First model - Running -->
+          <div class="model-item">
+            <div class="model-info">
+              <div class="model-icon">
+                <i class="fas fa-brain"></i>
+              </div>
+              <div class="model-details">
+                <h3>Llama-2-7b-chat</h3>
+                <span class="model-status running">Running</span>
+                <span class="model-meta">Port: 3000 • Memory: 7GB</span>
+              </div>
+            </div>
+            <div class="model-actions">
+              <button class="action-btn stop-btn">
+                <i class="fas fa-stop"></i>
+                <span>Stop</span>
+              </button>
+              <button class="action-btn restart-btn">
+                <i class="fas fa-redo"></i>
+                <span>Restart</span>
+              </button>
+              <button class="action-btn delete-btn">
+                <i class="fas fa-trash"></i>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Second model - Downloaded -->
+          <div class="model-item">
+            <div class="model-info">
+              <div class="model-icon">
+                <i class="fas fa-brain"></i>
+              </div>
+              <div class="model-details">
+                <h3>Mistral-7B-Instruct-v0.2</h3>
+                <span class="model-status downloaded">Downloaded</span>
+                <span class="model-meta">Size: 4.1GB • Modified: 2 days ago</span>
+              </div>
+            </div>
+            <div class="model-actions">
+              <button class="action-btn start-btn">
+                <i class="fas fa-play"></i>
+                <span>Start</span>
+              </button>
+              <button class="action-btn delete-btn">
+                <i class="fas fa-trash"></i>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Third model - Loaded -->
+          <div class="model-item">
+            <div class="model-info">
+              <div class="model-icon">
+                <i class="fas fa-brain"></i>
+              </div>
+              <div class="model-details">
+                <h3>Phi-2</h3>
+                <span class="model-status loaded">Loaded</span>
+                <span class="model-meta">Port: 3001 • Memory: 2.7GB</span>
+              </div>
+            </div>
+            <div class="model-actions">
+              <button class="action-btn start-btn">
+                <i class="fas fa-play"></i>
+                <span>Start</span>
+              </button>
+              <button class="action-btn delete-btn">
+                <i class="fas fa-trash"></i>
+                <span>Delete</span>
+              </button>
             </div>
           </div>
         </div>
