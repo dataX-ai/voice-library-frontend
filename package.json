@@ -43,6 +43,10 @@
       "artifactName": "${productName}-Setup-${version}.${ext}",
       "icon": "build/icon.ico"
     },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
     "deb": {
       "afterInstall": "installers/linux-post-install.sh"
     },
