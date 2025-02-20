@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Show appropriate content based on option clicked
             if (optionText.includes('Search Models')) {
                 document.querySelector('.model-search').classList.add('active');
+                // Fetch and display models when "Search Models" is clicked
+                fetchAndDisplayModels();
             } else if (optionText.includes('Text to Speech')) {
                 document.querySelector('.text-to-speech').classList.add('active');
             } else if (optionText.includes('Text to SFX')) {
@@ -780,4 +782,129 @@ async function updatePerformanceStats() {
     } catch (error) {
         console.error('Error updating performance stats:', error);
     }
+}
+
+// New function to fetch and display models
+async function fetchAndDisplayModels() {
+    const modelListContainer = document.querySelector('.model-list');
+    if (!modelListContainer) return;
+
+    modelListContainer.innerHTML = '<div class="loading-message">Loading models...</div>'; // Show loading message
+
+    try {
+        const response = await fetch('http://127.0.0.1:8000/models');
+        if (!response.ok) {
+            console.error(`HTTP error fetching models: ${response.status} ${response.statusText}`); // Log status and statusText
+            const errorText = await response.text(); // Get error text from response
+            console.error('Response body:', errorText); // Log response body
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        modelListContainer.innerHTML = ''; // Clear loading message
+
+        if (data.models && data.models.length > 0) {
+            data.models.forEach(model => {
+                const modelItem = createModelListItem(model);
+                modelListContainer.appendChild(modelItem);
+            });
+        } else {
+            modelListContainer.innerHTML = '<div class="no-models-message">No models found.</div>'; // Show no models message
+        }
+    } catch (error) {
+        console.error('Error fetching models:', error);
+        modelListContainer.innerHTML = '<div class="error-message">Failed to load models. Please check console.</div>'; // Show error message
+    }
+}
+
+// Function to create a model list item element
+function createModelListItem(model) {
+    const item = document.createElement('div');
+    item.classList.add('model-list-item');
+
+    const header = document.createElement('div');
+    header.classList.add('model-list-header');
+
+    const icon = document.createElement('div');
+    icon.classList.add('model-icon');
+    icon.textContent = '🤖'; // Default icon
+
+    const title = document.createElement('div');
+    title.classList.add('model-title');
+    title.textContent = model.model_id;
+
+    const tag = document.createElement('div');
+    tag.classList.add('model-tag');
+    tag.textContent = model.tags.length > 0 ? model.tags[0] : 'N/A'; // Using first tag as example
+
+    header.appendChild(icon);
+    header.appendChild(title);
+    header.appendChild(tag);
+
+    const description = document.createElement('p');
+    description.classList.add('model-description');
+    description.textContent = model.description || 'No description available.'; // Use description or default message
+
+    item.appendChild(header);
+    item.appendChild(description);
+
+    // Add event listener to handle model selection (you can expand this later)
+    item.addEventListener('click', () => {
+        // Remove selected class from all items
+        document.querySelectorAll('.model-list-item').forEach(i => {
+            i.classList.remove('selected');
+        });
+        // Add selected class to clicked item
+        item.classList.add('selected');
+        // Show model details section (you'll need to implement populateModelDetails function)
+        populateModelDetails(model);
+    });
+
+    return item;
+}
+
+function populateModelDetails(model) {
+    const modelDetailsSection = document.querySelector('.model-details-section');
+    if (!modelDetailsSection) return;
+
+    // For now, just update the model title in the details section
+    // You will need to expand this to populate all the details you want to show
+    const staffPickBanner = modelDetailsSection.querySelector('.staff-pick-banner p');
+    if (staffPickBanner) {
+        staffPickBanner.textContent = model.description || 'No description available.';
+    }
+
+    const modelTitleElement = modelDetailsSection.querySelector('.staff-pick-banner h3');
+    if (modelTitleElement) {
+        modelTitleElement.textContent = model.model_id;
+    }
+
+    const metaRow = modelDetailsSection.querySelector('.meta-row');
+    if (metaRow) {
+        metaRow.innerHTML = ''; // Clear existing meta data
+        // Example meta items - expand as needed
+        metaRow.appendChild(createMetaItem('Author:', model.author));
+        metaRow.appendChild(createMetaItem('Downloads:', model.downloads));
+        metaRow.appendChild(createMetaItem('Likes:', model.likes));
+        metaRow.appendChild(createMetaItem('Last Modified:', new Date(model.last_modified).toLocaleDateString()));
+    }
+
+    // Show model details section
+    document.querySelector('.model-list').style.display = 'block'; // Ensure model list is visible
+    modelDetailsSection.style.display = 'block'; // Make details section visible
+}
+
+function createMetaItem(label, value) {
+    const metaItem = document.createElement('div');
+    metaItem.classList.add('meta-item');
+
+    const metaLabel = document.createElement('span');
+    metaLabel.classList.add('meta-label');
+    metaLabel.textContent = label;
+
+    const metaValue = document.createElement('span');
+    metaValue.textContent = value || 'N/A';
+
+    metaItem.appendChild(metaLabel);
+    metaItem.appendChild(metaValue);
+    return metaItem;
 }
