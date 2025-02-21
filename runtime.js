@@ -140,6 +140,120 @@ function initializeRuntimePage() {
     }
 }
 
+async function initializeApp() {
+    const loadingScreen = document.querySelector('.loading-screen');
+    const loadingSpinner = loadingScreen.querySelector('.loading-spinner');
+    const successCheck = loadingScreen.querySelector('.success-check');
+    const loadingText = loadingScreen.querySelector('.loading-text');
+    const statusText = document.getElementById('docker-status-text');
+    const dockerInstallContainer = document.querySelector('.docker-install-container');
+    const mainContent = document.querySelector('.main-content');
+
+    try {
+        // Check Docker status
+        const dockerStatus = await checkDockerInstallation();
+        
+        if (dockerStatus.installed && dockerStatus.running) {
+            // Update status text
+            loadingText.textContent = 'Checking Model Container...';
+            statusText.textContent = 'Setting up model environment...';
+
+            try {
+                // Check and setup model container
+                await window.electronAPI.checkModelContainer();
+                
+                // Swap spinner with success check
+                loadingSpinner.style.opacity = '0';
+                setTimeout(() => {
+                    loadingSpinner.style.display = 'none';
+                    successCheck.style.display = 'block';
+                    setTimeout(() => {
+                        successCheck.style.opacity = '1';
+                    }, 50);
+                }, 300);
+
+                // Show success message
+                loadingText.textContent = 'Model Environment Ready';
+                statusText.textContent = 'Initializing application...';
+                
+                // Wait 2 seconds then show main content
+                setTimeout(() => {
+                    // Fade out loading screen
+                    loadingScreen.style.transition = 'opacity 0.5s ease-out';
+                    loadingScreen.style.opacity = '0';
+                    
+                    // Show main content
+                    mainContent.style.display = 'flex';
+                    mainContent.classList.add('visible');
+                    
+                    // Remove loading screen after fade
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
+                }, 2000);
+            } catch (containerError) {
+                loadingText.textContent = 'Error Setting Up Model Environment';
+                statusText.textContent = containerError.message;
+                console.error('Container setup error:', containerError);
+            }
+        } else {
+            // Show Docker installation required message
+            loadingText.textContent = 'Docker Setup Required';
+            statusText.textContent = dockerStatus.installed ? 
+                'Docker is installed but not running' : 
+                'Docker is not installed';
+            
+            // Show install button
+            dockerInstallContainer.style.display = 'block';
+            
+            // Add click handler for install button
+            const installButton = dockerInstallContainer.querySelector('.setup-docker-btn');
+            installButton.addEventListener('click', async () => {
+                try {
+                    loadingText.textContent = 'Installing Docker';
+                    statusText.textContent = 'This may take a few minutes...';
+                    dockerInstallContainer.style.display = 'none';
+                    
+                    // Start Docker installation
+                    await window.electronAPI.installDocker();
+                    
+                    // Check status again after installation
+                    const newStatus = await checkDockerInstallation();
+                    if (newStatus.installed && newStatus.running) {
+                        loadingText.textContent = 'Docker Installed Successfully';
+                        statusText.textContent = 'Initializing application...';
+                        
+                        // Wait 2 seconds then show main content
+                        setTimeout(() => {
+                            loadingScreen.style.transition = 'opacity 0.5s ease-out';
+                            loadingScreen.style.opacity = '0';
+                            mainContent.style.display = 'flex';
+                            mainContent.classList.add('visible');
+                            setTimeout(() => {
+                                loadingScreen.style.display = 'none';
+                            }, 500);
+                        }, 2000);
+                    } else {
+                        throw new Error('Docker installation failed');
+                    }
+                } catch (error) {
+                    loadingText.textContent = 'Docker Installation Failed';
+                    statusText.textContent = 'Please install Docker manually';
+                    dockerInstallContainer.style.display = 'block';
+                    console.error('Docker installation error:', error);
+                }
+            });
+        }
+    } catch (error) {
+        loadingText.textContent = 'Error Checking Docker Status';
+        statusText.textContent = 'Please try again';
+        console.error('Docker check error:', error);
+    }
+}
+
+// Call initializeApp when the document is loaded
+document.addEventListener('DOMContentLoaded', initializeApp);
+
 // Export functions if needed
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {

@@ -5,6 +5,7 @@ const si = require('systeminformation');
 const os = require('os');
 const { exec } = require('child_process');
 const DockerManager = require('./runtimes/docker.js');
+const { getDataPath } = require('./utils/paths');
 
 // Move these lines before app.whenReady()
 app.disableHardwareAcceleration();
@@ -25,17 +26,14 @@ function createWindow() {
         minWidth: 1024,
         minHeight: 768,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
             contextIsolation: true,
-            webSecurity: false, // Allow cross-origin requests
-            partition: 'persist:main'
+            preload: path.join(__dirname, 'preload.js'),
+            webSecurity: false
         }
     });
 
     win.loadFile('index.html');
-
-    // For debugging
     win.webContents.openDevTools();
 }
 
@@ -249,6 +247,14 @@ ipcMain.handle('run-docker-check', async () => {
     }
 });
 
+ipcMain.handle('check-model-container', async () => {
+    try {
+        return await DockerManager.checkModelContainer();
+    } catch (error) {
+        throw error;
+    }
+});
+
 // Replace the existing checkPolkitRules function
 async function checkPolkitRules() {
     if (process.platform !== 'linux') return;
@@ -281,4 +287,9 @@ async function checkPolkitRules() {
         console.error('Error checking/installing polkit rules:', error);
         throw error;
     }
-} 
+}
+
+ipcMain.handle('get-absolute-path', async (event, relativePath) => {
+    const dataPath = getDataPath();
+    return path.join(dataPath, relativePath);
+}); 

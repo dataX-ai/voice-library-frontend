@@ -1,4 +1,223 @@
+// Replace the direct CONFIG assignment with a function to get CONFIG
+
+function getConfig() {
+    return window.electronAPI.config;
+}
+
+// At the beginning of the file, after the initial variable declarations
+// Add all styles in one place
+const styles = document.createElement('style');
+styles.textContent = `
+    /* Progress bar styles */
+    .progress-bar::before {
+        width: var(--progress, 0%);
+    }
+
+    /* Model dropdown styles */
+    .action-button-wrapper {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: #f8fafc;
+        padding: 8px;
+        border-radius: 8px;
+    }
+
+    .models-dropdown {
+        position: relative;
+        min-width: 180px;
+    }
+
+    .models-select {
+        width: 100%;
+        padding: 8px 32px 8px 12px;
+        font-size: 14px;
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+        background-color: white;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2.22 4.47a.75.75 0 0 1 1.06 0L6 7.19l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L2.22 5.53a.75.75 0 0 1 0-1.06z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        color: #1a202c;
+        height: 36px;
+        line-height: 1.2;
+    }
+
+    .models-select:focus {
+        outline: none;
+        border-color: #4F46E5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .models-select:hover {
+        border-color: #cbd5e0;
+    }
+
+    .action-button {
+        margin: 0;
+    }
+
+    .models-select option {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    /* Download button styles */
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .download-btn {
+        background-color: #4F46E5;
+        color: white;
+        border: none;
+    }
+    
+    .download-btn:hover {
+        background-color: #4338CA;
+    }
+    
+    .downloaded-btn {
+        background-color: #80c492;
+        color: white;
+        border: none;
+        opacity: 0.8;
+        cursor: default;
+    }
+    
+    .downloaded-btn i {
+        color: white;
+    }
+
+    .download-btn:disabled,
+    .downloaded-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Sidebar and content visibility fixes */
+    .sidebar-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        cursor: pointer;
+        padding: 10px;
+    }
+
+    .voice-dropdown {
+        display: none;
+        position: absolute;
+        left: 100%;
+        top: 0;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-radius: 4px;
+        z-index: 1000;
+        min-width: 200px;
+    }
+
+    .voice-option {
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .voice-option:hover {
+        background-color: #f3f4f6;
+    }
+
+    .voice-content {
+        display: none;
+    }
+
+    .voice-content.active {
+        display: block;
+    }
+
+    /* My Models specific styles */
+    .my-models .models-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .model-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .model-status {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .model-status.running {
+        background-color: #10B981;
+        color: white;
+    }
+
+    .model-status.downloaded {
+        background-color: #6B7280;
+        color: white;
+    }
+`;
+document.head.appendChild(styles);
+
 document.addEventListener('DOMContentLoaded', async () => {
+    const CONFIG = getConfig();
+    // Fetch downloaded models first
+    await fetchDownloadedModels();
+    
+    // Then fetch and display models
+    await fetchAndDisplayModels();
+    
+    // Show initial model (first model in the list)
+    const firstModel = document.querySelector('.model-list-item');
+    if (firstModel) {
+        firstModel.click();
+    }
+
+    // Create the dropdown for Text to Speech since it's the default view
+    const voiceoverButton = document.querySelector('.action-button:nth-child(3)');
+    if (voiceoverButton && !voiceoverButton.closest('.action-button-wrapper')) {
+        // Create a flex container for the button and dropdown
+        const wrapper = document.createElement('div');
+        wrapper.className = 'action-button-wrapper';
+        
+        // Get the button's parent and position
+        const parent = voiceoverButton.parentNode;
+        const buttonIndex = Array.from(parent.children).indexOf(voiceoverButton);
+        
+        // Move the button into the wrapper
+        wrapper.appendChild(voiceoverButton);
+        
+        // Create and add the dropdown
+        const dropdown = await createModelsDropdown();
+        wrapper.appendChild(dropdown);
+        
+        // Replace the original button with the wrapper
+        parent.insertBefore(wrapper, parent.children[buttonIndex]);
+    }
+
     // Remove backdrop creation
     let activeDropdown = null;
 
@@ -23,34 +242,82 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Handle voice option clicks
     document.querySelectorAll('.voice-option').forEach(option => {
-        option.addEventListener('click', function (e) {
+        option.addEventListener('click', async function (e) {
             e.stopPropagation();
             const optionText = this.textContent;
 
-            // Hide all content first
+            // Hide all content sections first
             document.querySelectorAll('.voice-content').forEach(div => {
                 div.classList.remove('active');
+                div.style.display = 'none'; // Explicitly hide all sections
             });
 
             // Show appropriate content based on option clicked
-            if (optionText.includes('Search Models')) {
-                document.querySelector('.model-search').classList.add('active');
-                // Fetch and display models when "Search Models" is clicked
+            if (optionText.includes('Text to Speech')) {
+                const ttsSection = document.querySelector('.text-to-speech');
+                ttsSection.classList.add('active');
+                ttsSection.style.display = 'block'; // Explicitly show the section
+                
+                // Create the voiceover button wrapper and dropdown when TTS page is shown
+                const voiceoverButton = document.querySelector('.action-button:nth-child(3)');
+                if (voiceoverButton && !voiceoverButton.closest('.action-button-wrapper')) {
+                    // Create a flex container for the button and dropdown
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'action-button-wrapper';
+                    
+                    // Get the button's parent and position
+                    const parent = voiceoverButton.parentNode;
+                    const buttonIndex = Array.from(parent.children).indexOf(voiceoverButton);
+                    
+                    // Move the button into the wrapper
+                    wrapper.appendChild(voiceoverButton);
+                    
+                    // Create and add the dropdown
+                    const dropdown = await createModelsDropdown();
+                    wrapper.appendChild(dropdown);
+                    
+                    // Replace the original button with the wrapper
+                    parent.insertBefore(wrapper, parent.children[buttonIndex]);
+                }
+                
+                // Always update dropdown options when switching to TTS
+                const select = document.getElementById('models-select');
+                if (select) {
+                    await updateDropdownOptions(select);
+                }
+            } else if (optionText.includes('Search Models')) {
+                const searchSection = document.querySelector('.model-search');
+                searchSection.classList.add('active');
+                searchSection.style.display = 'block';
                 fetchAndDisplayModels();
-            } else if (optionText.includes('Text to Speech')) {
-                document.querySelector('.text-to-speech').classList.add('active');
-            } else if (optionText.includes('Text to SFX')) {
-                document.querySelector('.text-to-sfx').classList.add('active');
-            } else if (optionText.includes('Voice Changer')) {
-                document.querySelector('.voice-changer').classList.add('active');
-            } else if (optionText.includes('Voice Cloning')) {
-                document.querySelector('.voice-cloning').classList.add('active');
-            } else if (optionText.includes('System Info')) {
-                document.querySelector('.system-info').classList.add('active');
-            } else if (optionText.includes('Runtimes')) {
-                document.querySelector('.runtimes').classList.add('active');
             } else if (optionText.includes('My Models')) {
-                document.querySelector('.my-models').classList.add('active');
+                const myModelsSection = document.querySelector('.my-models');
+                myModelsSection.classList.add('active');
+                myModelsSection.style.display = 'block';
+                fetchAndDisplayMyModels();
+            } else if (optionText.includes('Text to SFX')) {
+                const sfxSection = document.querySelector('.text-to-sfx');
+                sfxSection.classList.add('active');
+                sfxSection.style.display = 'block';
+            } else if (optionText.includes('Voice Changer')) {
+                const changerSection = document.querySelector('.voice-changer');
+                changerSection.classList.add('active');
+                changerSection.style.display = 'block';
+            } else if (optionText.includes('Voice Cloning')) {
+                const cloningSection = document.querySelector('.voice-cloning');
+                cloningSection.classList.add('active');
+                cloningSection.style.display = 'block';
+            } else if (optionText.includes('System Info')) {
+                const sysInfoSection = document.querySelector('.system-info');
+                sysInfoSection.classList.add('active');
+                sysInfoSection.style.display = 'block';
+                updateSystemInfo();
+                const statsInterval = setInterval(updatePerformanceStats, 1000);
+                this.dataset.statsInterval = statsInterval;
+            } else if (optionText.includes('Runtimes')) {
+                const runtimesSection = document.querySelector('.runtimes');
+                runtimesSection.classList.add('active');
+                runtimesSection.style.display = 'block';
             }
 
             // Close the dropdown after selection
@@ -59,14 +326,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 activeDropdown = null;
             }
 
-            if (optionText.includes('System Info')) {
-                updateSystemInfo();
-                // Start periodic updates for performance stats
-                const statsInterval = setInterval(updatePerformanceStats, 1000);
-                // Store the interval ID to clear it when switching away
-                this.dataset.statsInterval = statsInterval;
-            } else if (this.dataset.statsInterval) {
-                // Clear the interval when switching to a different page
+            // Handle cleanup of intervals
+            if (!optionText.includes('System Info') && this.dataset.statsInterval) {
                 clearInterval(this.dataset.statsInterval);
                 delete this.dataset.statsInterval;
             }
@@ -89,7 +350,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Show Text to Speech content by default
-    document.querySelector('.text-to-speech').classList.add('active');
+    const defaultSection = document.querySelector('.text-to-speech');
+    if (defaultSection) {
+        defaultSection.classList.add('active');
+        defaultSection.style.display = 'block';
+    }
 
     // Handle character count for both text-to-speech and text-to-sfx textareas
     const textInputs = {
@@ -189,15 +454,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Update the CSS for the progress bar to show progress
-    const style = document.createElement('style');
-    style.textContent = `
-        .progress-bar::before {
-            width: var(--progress, 0%);
-        }
-    `;
-    document.head.appendChild(style);
-
     // Handle model filtering
     const modelFilterInput = document.getElementById('modelFilterInput');
     if (modelFilterInput) {
@@ -253,6 +509,206 @@ document.addEventListener('DOMContentLoaded', async () => {
                     break;
             }
         });
+    });
+
+    // Add click handler for document
+    document.addEventListener('click', (e) => {
+        const modelSearchInput = document.getElementById('modelSearchInput');
+        const searchResults = document.querySelector('.search-results');
+        
+        // Only run this check if both elements exist
+        if (modelSearchInput && searchResults) {
+            if (!modelSearchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        }
+    });
+
+    // Update the play button handler
+    let currentAudio = null;
+
+    document.addEventListener('click', async (e) => {
+        if (e.target.closest('button') && e.target.closest('button').textContent.includes('Generate')) {
+            const generateButton = e.target.closest('button');
+            try {
+                // Get the selected model
+                const modelSelect = document.getElementById('models-select');
+                const selectedModel = modelSelect.value;
+                if (!selectedModel) {
+                    alert('Please select a model first');
+                    return;
+                }
+
+
+                const textInput = document.getElementById('text-input');
+                const text = textInput.value;
+
+                if (!text.trim()) {
+                    alert('Please enter some text first');
+                    return;
+                }
+                // Disable button and show loading state
+                generateButton.disabled = true;
+                generateButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+
+                // Stop any currently playing audio
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+
+                // Show audio controls with loading state
+                const audioControls = document.querySelector('.audio-controls');
+                audioControls.style.display = 'block';
+                const currentTimeSpan = document.querySelector('.current-time');
+                const durationSpan = document.querySelector('.duration');
+                currentTimeSpan.textContent = '--:--';
+                durationSpan.textContent = '--:--';
+
+                // Include the selected model in your API call
+                const response = await fetch(CONFIG.LOCAL_ENDPOINT + '/tts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        text,
+                        model_id: selectedModel 
+                    })
+                });
+
+                if (!response.ok) {
+                    console.error('HTTP error:', response.status);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const audioFilePath = data.filename;
+
+                // Get absolute path through main process
+                const absoluteAudioPath = await window.electronAPI.getAbsolutePath(audioFilePath);
+                console.log('Absolute audio path:', absoluteAudioPath);
+                currentAudio = new Audio(absoluteAudioPath);
+
+                // Get control elements
+                const playPauseBtn = document.getElementById('playPauseBtn');
+                const stopBtn = document.getElementById('stopBtn');
+                const volumeSlider = document.getElementById('volumeSlider');
+                const progressBar = document.querySelector('.progress');
+                const progressContainer = document.querySelector('.progress-bar');
+
+                // Set up audio event listeners
+                currentAudio.addEventListener('loadedmetadata', () => {
+                    if (isNaN(currentAudio.duration) || !isFinite(currentAudio.duration)) {
+                        durationSpan.textContent = '--:--';
+                    } else {
+                        durationSpan.textContent = formatTime(currentAudio.duration);
+                    }
+                });
+
+                currentAudio.addEventListener('timeupdate', () => {
+                    currentTimeSpan.textContent = formatTime(currentAudio.currentTime);
+                    if (!isNaN(currentAudio.duration) && isFinite(currentAudio.duration)) {
+                        const progress = (currentAudio.currentTime / currentAudio.duration) * 100;
+                        progressBar.style.width = `${progress}%`;
+                    }
+                });
+
+                // Play/Pause button
+                playPauseBtn.onclick = () => {
+                    if (currentAudio.paused) {
+                        currentAudio.play();
+                        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    } else {
+                        currentAudio.pause();
+                        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    }
+                };
+
+                // Stop button
+                stopBtn.onclick = () => {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    progressBar.style.width = '0%';
+                    currentTimeSpan.textContent = '0:00';
+                };
+
+                // Volume control
+                volumeSlider.oninput = (e) => {
+                    if (currentAudio) {
+                        currentAudio.volume = e.target.value / 100;
+                    }
+                };
+
+                // Progress bar click handling
+                progressContainer.addEventListener('click', (e) => {
+                    if (currentAudio && !isNaN(currentAudio.duration)) {
+                        const rect = progressContainer.getBoundingClientRect();
+                        const pos = (e.clientX - rect.left) / rect.width;
+                        currentAudio.currentTime = pos * currentAudio.duration;
+                        progressBar.style.width = `${pos * 100}%`;
+                    }
+                });
+
+                // Start playing the audio
+                await currentAudio.play();
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+
+                // Reset generate button
+                generateButton.disabled = false;
+                generateButton.innerHTML = '<i class="fas fa-play"></i> Generate';
+
+            } catch (error) {
+                console.error('Error generating/playing audio:', error);
+                // // Reset generate button on error
+                // generateButton.disabled = false;
+                // generateButton.innerHTML = '<i class="fas fa-play"></i> Generate';
+                
+                // Show error message to user
+                alert(`Error generating audio. Please try again. ${error}`);
+            }
+        }
+    });
+
+    // Initial system info update if starting on system info page
+    if (document.querySelector('.system-info').classList.contains('active')) {
+        updateSystemInfo();
+        updatePerformanceStats();
+    }
+
+    // Add this to handle model selection
+    document.querySelectorAll('.model-list-item').forEach(item => {
+        item.addEventListener('click', function () {
+            // Remove selected class from all items
+            document.querySelectorAll('.model-list-item').forEach(i => {
+                i.classList.remove('selected');
+            });
+
+            // Add selected class to clicked item
+            this.classList.add('selected');
+
+            // Show model details section
+            document.querySelector('.model-details-section').style.display = 'block';
+        });
+    });
+
+    // Make sure sidebar icons are visible
+    document.querySelectorAll('.sidebar-icon').forEach(icon => {
+        icon.style.display = 'flex';
+        icon.style.alignItems = 'center';
+        icon.style.justifyContent = 'center';
+        
+        // Ensure the dropdown is properly positioned
+        const dropdown = icon.querySelector('.voice-dropdown');
+        if (dropdown) {
+            dropdown.style.position = 'absolute';
+            dropdown.style.left = '100%';
+            dropdown.style.top = '0';
+            dropdown.style.zIndex = '1000';
+            dropdown.style.backgroundColor = '#fff';
+            dropdown.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+        }
     });
 });
 
@@ -556,114 +1012,6 @@ if (document.querySelector('.system-info').classList.contains('active')) {
     updatePerformanceStats();
 }
 
-// Update the play button handler
-let currentAudio = null;
-
-document.addEventListener('click', async (e) => {
-    if (e.target.closest('button') && e.target.closest('button').textContent.includes('Generate')) {
-        const generateButton = e.target.closest('button');
-        try {
-            const textInput = document.getElementById('text-input');
-            const text = textInput.value;
-
-            if (!text.trim()) {
-                alert('Please enter some text first');
-                return;
-            }
-
-            generateButton.disabled = true;
-            generateButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-
-            if (currentAudio) {
-                currentAudio.pause();
-            }
-            currentAudio = new Audio('http://127.0.0.1:8001/stream_audio');
-
-            // Show audio controls
-            const audioControls = document.querySelector('.audio-controls');
-            audioControls.style.display = 'block';
-
-            // Get control elements
-            const playPauseBtn = document.getElementById('playPauseBtn');
-            const stopBtn = document.getElementById('stopBtn');
-            const volumeSlider = document.getElementById('volumeSlider');
-            const progressBar = document.querySelector('.progress');  // Changed to target the progress element
-            const progressContainer = document.querySelector('.progress-bar');  // Container for click events
-            const currentTimeSpan = document.querySelector('.current-time');
-            const durationSpan = document.querySelector('.duration');
-
-            // Set up audio event listeners
-            currentAudio.addEventListener('loadedmetadata', () => {
-                // For streaming content, we might not get a valid duration
-                if (isNaN(currentAudio.duration) || !isFinite(currentAudio.duration)) {
-                    durationSpan.textContent = '--:--'; // Changed from 'Live' to '--:--'
-                } else {
-                    durationSpan.textContent = formatTime(currentAudio.duration);
-                }
-            });
-
-            currentAudio.addEventListener('timeupdate', () => {
-                // Only show current time for streaming content
-                currentTimeSpan.textContent = formatTime(currentAudio.currentTime);
-
-                // If we have a valid duration, show progress
-                if (!isNaN(currentAudio.duration) && isFinite(currentAudio.duration)) {
-                    const progress = (currentAudio.currentTime / currentAudio.duration) * 100;
-                    progressBar.style.width = `${progress}%`;
-                }
-            });
-
-            // Play/Pause button
-            playPauseBtn.onclick = () => {
-                if (currentAudio.paused) {
-                    currentAudio.play();
-                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                } else {
-                    currentAudio.pause();
-                    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                }
-            };
-
-            // Stop button
-            stopBtn.onclick = () => {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
-                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                progressBar.style.width = '0%';  // Reset progress bar width
-                currentTimeSpan.textContent = '0:00';
-            };
-
-            // Volume control
-            volumeSlider.oninput = (e) => {
-                if (currentAudio) {
-                    currentAudio.volume = e.target.value / 100;
-                }
-            };
-
-            // Progress bar click handling
-            progressContainer.addEventListener('click', (e) => {
-                if (currentAudio && !isNaN(currentAudio.duration)) {
-                    const rect = progressContainer.getBoundingClientRect();
-                    const pos = (e.clientX - rect.left) / rect.width;
-                    currentAudio.currentTime = pos * currentAudio.duration;
-                    progressBar.style.width = `${pos * 100}%`;
-                }
-            });
-
-            // Start playing the audio
-            await currentAudio.play();
-            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-            generateButton.disabled = false;
-            generateButton.innerHTML = '<i class="fas fa-play"></i> Generate';
-
-        } catch (error) {
-            console.error('Error playing audio:', error);
-            generateButton.disabled = false;
-            generateButton.innerHTML = '<i class="fas fa-play"></i> Generate';
-        }
-    }
-});
-
 // Helper function to format time
 function formatTime(seconds) {
     if (isNaN(seconds)) return '0:00';
@@ -784,23 +1132,246 @@ async function updatePerformanceStats() {
     }
 }
 
-// New function to fetch and display models
-async function fetchAndDisplayModels() {
-    const modelListContainer = document.querySelector('.model-list');
-    if (!modelListContainer) return;
+// Add these at the top of renderer.js with other global variables
+let downloadedModels = new Map();
+let downloadingSockets = new Map(); // Track active download sockets
 
-    modelListContainer.innerHTML = '<div class="loading-message">Loading models...</div>'; // Show loading message
-
+// Function to fetch already downloaded models
+async function fetchDownloadedModels() {
+    const CONFIG = getConfig();
     try {
-        const response = await fetch('http://127.0.0.1:8000/models');
+        console.log('Fetching downloaded models...');
+        const response = await fetch(`${CONFIG.LOCAL_ENDPOINT}/models/download`);
         if (!response.ok) {
-            console.error(`HTTP error fetching models: ${response.status} ${response.statusText}`); // Log status and statusText
-            const errorText = await response.text(); // Get error text from response
-            console.error('Response body:', errorText); // Log response body
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        modelListContainer.innerHTML = ''; // Clear loading message
+        console.log('Downloaded models:', data);
+        
+        // Convert array of objects to Map
+        downloadedModels = new Map(
+            data.map(model => [model.model_id, model.download_status])
+        );
+        
+        // Log the Map to verify conversion
+        console.log('Downloaded models Map:', downloadedModels);
+    } catch (error) {
+        console.error('Error fetching downloaded models:', error);
+        downloadedModels = new Map();
+    }
+}
+
+// Update handleModelDownload to maintain the Map structure
+function handleModelDownload(modelId, downloadBtn) {
+    const CONFIG = getConfig();
+    console.log('Attempting to download model:', modelId);
+    
+    // If already downloading, return
+    if (downloadingSockets.has(modelId)) {
+        console.log('Download already in progress');
+        return;
+    }
+
+    const socket = new WebSocket(CONFIG.DOWNLOAD_ENDPOINT);
+    
+    socket.onopen = () => {
+        // Set initial downloading status
+        downloadedModels.set(modelId, CONFIG.DOWNLOAD_STATUS.DOWNLOADING);
+        downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        downloadBtn.disabled = true;
+        
+        const message = JSON.stringify({ model_id: modelId });
+        socket.send(message);
+    };
+
+    socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        switch (data.status) {
+            case CONFIG.DOWNLOAD_STATUS.DOWNLOADING:
+                if (data.model_id === modelId) {
+                    downloadedModels.set(modelId, CONFIG.DOWNLOAD_STATUS.DOWNLOADING);
+                    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    downloadBtn.disabled = true;
+                }
+                break;
+            
+            case CONFIG.DOWNLOAD_STATUS.READY:
+                if (data.model_id === modelId) {
+                    downloadedModels.set(modelId, CONFIG.DOWNLOAD_STATUS.READY);
+                    downloadBtn.innerHTML = '<i class="fas fa-check"></i>';
+                    downloadBtn.classList.remove('download-btn');
+                    downloadBtn.classList.add('downloaded-btn');
+                    downloadBtn.disabled = true;
+                    downloadingSockets.delete(modelId);
+                    socket.close();
+                }
+                break;
+        }
+    };
+
+    socket.onerror = (error) => {
+        console.error('WebSocket Error:', error);
+        downloadedModels.delete(modelId); // Remove failed download from Map
+        downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
+        downloadBtn.disabled = false;
+        downloadingSockets.delete(modelId);
+    };
+
+    socket.onclose = () => {
+        downloadingSockets.delete(modelId);
+    };
+
+    downloadingSockets.set(modelId, socket);
+}
+
+// Update the populateModelDetails function to include download status
+function populateModelDetails(model) {
+    const CONFIG = getConfig();
+    const modelDetailsSection = document.querySelector('.model-details-section');
+    if (!modelDetailsSection) return;
+
+    console.log('Populating model details for:', model.model_id);
+    console.log('Downloaded models Map:', Array.from(downloadedModels.entries()));
+    console.log('Current model status:', downloadedModels.get(model.model_id));
+
+    // Update staff pick banner and title (existing code)
+    const staffPickBanner = modelDetailsSection.querySelector('.staff-pick-banner p');
+    if (staffPickBanner) {
+        staffPickBanner.textContent = model.description || 'No description available.';
+    }
+
+    const modelTitleElement = modelDetailsSection.querySelector('.staff-pick-banner h3');
+    if (modelTitleElement) {
+        modelTitleElement.textContent = model.model_id;
+    }
+
+    // Create and populate download section
+    let downloadSection = modelDetailsSection.querySelector('.download-section');
+    if (!downloadSection) {
+        downloadSection = document.createElement('div');
+        downloadSection.className = 'download-section';
+        modelDetailsSection.appendChild(downloadSection);
+    }
+
+    // Get the current download status for this model
+    const downloadStatus = downloadedModels.get(model.model_id);
+    console.log(`Model ${model.model_id} status:`, downloadStatus);
+
+    // Determine button classes and state based on download status
+    const isDownloading = downloadStatus === CONFIG.DOWNLOAD_STATUS.DOWNLOADING;
+    const isDownloaded = downloadStatus === CONFIG.DOWNLOAD_STATUS.READY;
+    const buttonClass = isDownloaded ? 'downloaded-btn' : 'download-btn';
+    const buttonDisabled = isDownloaded || isDownloading;
+    const buttonIcon = isDownloaded ? 'fa-check' : (isDownloading ? 'fa-spinner fa-spin' : 'fa-download');
+
+    // Debug logging
+    console.log('Button state:', {
+        modelId: model.model_id,
+        downloadStatus,
+        isDownloaded,
+        isDownloading,
+        buttonClass,
+        buttonDisabled,
+        buttonIcon
+    });
+
+    // Update the download button section
+    downloadSection.innerHTML = `
+        <div class="download-header">
+            <span>4 download options available</span>
+            <span class="info-icon"><i class="fas fa-info-circle"></i></span>
+        </div>
+        <div class="download-item">
+            <div class="file-info">
+                <span class="file-name">Q4_K_M</span>
+                <span class="model-name">Qwen2.5 7B Instruct 1M</span>
+            </div>
+            <div class="file-actions">
+                <button class="copy-btn"><i class="fas fa-clipboard"></i></button>
+                <button class="like-btn"><i class="fas fa-thumbs-up"></i></button>
+                <button class="${buttonClass} action-btn" ${buttonDisabled ? 'disabled' : ''}>
+                    <i class="fas ${buttonIcon}"></i>
+                    <span>${isDownloaded ? 'Downloaded' : 'Download'}</span>
+                </button>
+                <span class="file-size">4.68 GB</span>
+                <button class="expand-btn"><i class="fas fa-chevron-down"></i></button>
+            </div>
+        </div>
+    `;
+
+    // Debug: Check if button was created
+    console.log('Created button:', downloadSection.querySelector('.download-btn, .downloaded-btn'));
+
+    // Add meta row (existing code)
+    const metaRow = modelDetailsSection.querySelector('.meta-row');
+    if (metaRow) {
+        metaRow.innerHTML = '';
+        metaRow.appendChild(createMetaItem('Author:', model.author));
+        metaRow.appendChild(createMetaItem('Downloads:', model.downloads));
+        metaRow.appendChild(createMetaItem('Likes:', model.likes));
+        metaRow.appendChild(createMetaItem('Last Modified:', new Date(model.last_modified).toLocaleDateString()));
+    }
+
+    // Update the download button event listener
+    const downloadBtn = downloadSection.querySelector('.download-btn, .downloaded-btn');
+    if (downloadBtn) {
+        downloadBtn.replaceWith(downloadBtn.cloneNode(true));
+        const newDownloadBtn = downloadSection.querySelector('.download-btn, .downloaded-btn');
+        
+        // Only add click listener if model is not downloaded or downloading
+        if (!isDownloaded && !isDownloading) {
+            newDownloadBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleModelDownload(model.model_id, newDownloadBtn);
+            });
+        }
+    }
+
+    // Show model details section
+    document.querySelector('.model-list').style.display = 'block';
+    modelDetailsSection.style.display = 'block';
+}
+
+function createMetaItem(label, value) {
+    const metaItem = document.createElement('div');
+    metaItem.classList.add('meta-item');
+
+    const metaLabel = document.createElement('span');
+    metaLabel.classList.add('meta-label');
+    metaLabel.textContent = label;
+
+    const metaValue = document.createElement('span');
+    metaValue.textContent = value || 'N/A';
+
+    metaItem.appendChild(metaLabel);
+    metaItem.appendChild(metaValue);
+    return metaItem;
+}
+
+// Update the fetchAndDisplayModels function to include initial download status check
+async function fetchAndDisplayModels() {
+    const CONFIG = getConfig();
+    const modelListContainer = document.querySelector('.model-list');
+    if (!modelListContainer) return;
+
+    modelListContainer.innerHTML = '<div class="loading-message">Loading models...</div>';
+
+    try {
+        // Fetch downloaded models first
+        await fetchDownloadedModels();
+        
+        // Then fetch and display models using the correct endpoint
+        const response = await fetch(`${CONFIG.BACKEND_ENDPOINT}/models`, {method: 'POST'});
+        if (!response.ok) {
+            console.error(`HTTP error fetching models: ${response.status} ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('Response body:', errorText);
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        modelListContainer.innerHTML = '';
 
         if (data.models && data.models.length > 0) {
             data.models.forEach(model => {
@@ -808,11 +1379,11 @@ async function fetchAndDisplayModels() {
                 modelListContainer.appendChild(modelItem);
             });
         } else {
-            modelListContainer.innerHTML = '<div class="no-models-message">No models found.</div>'; // Show no models message
+            modelListContainer.innerHTML = '<div class="no-models-message">No models found.</div>';
         }
     } catch (error) {
         console.error('Error fetching models:', error);
-        modelListContainer.innerHTML = '<div class="error-message">Failed to load models. Please check console.</div>'; // Show error message
+        modelListContainer.innerHTML = '<div class="error-message">Failed to load models. Please check console.</div>';
     }
 }
 
@@ -862,49 +1433,228 @@ function createModelListItem(model) {
     return item;
 }
 
-function populateModelDetails(model) {
-    const modelDetailsSection = document.querySelector('.model-details-section');
-    if (!modelDetailsSection) return;
+// Update the createModelsDropdown function to add click listener
+async function createModelsDropdown() {
+    const CONFIG = getConfig();
+    const dropdown = document.createElement('div');
+    dropdown.className = 'models-dropdown';
+    
+    const select = document.createElement('select');
+    select.id = 'models-select';
+    select.className = 'models-select';
+    
+    // Add default option with improved styling
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Choose a voice model';
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    select.appendChild(defaultOption);
 
-    // For now, just update the model title in the details section
-    // You will need to expand this to populate all the details you want to show
-    const staffPickBanner = modelDetailsSection.querySelector('.staff-pick-banner p');
-    if (staffPickBanner) {
-        staffPickBanner.textContent = model.description || 'No description available.';
-    }
-
-    const modelTitleElement = modelDetailsSection.querySelector('.staff-pick-banner h3');
-    if (modelTitleElement) {
-        modelTitleElement.textContent = model.model_id;
-    }
-
-    const metaRow = modelDetailsSection.querySelector('.meta-row');
-    if (metaRow) {
-        metaRow.innerHTML = ''; // Clear existing meta data
-        // Example meta items - expand as needed
-        metaRow.appendChild(createMetaItem('Author:', model.author));
-        metaRow.appendChild(createMetaItem('Downloads:', model.downloads));
-        metaRow.appendChild(createMetaItem('Likes:', model.likes));
-        metaRow.appendChild(createMetaItem('Last Modified:', new Date(model.last_modified).toLocaleDateString()));
-    }
-
-    // Show model details section
-    document.querySelector('.model-list').style.display = 'block'; // Ensure model list is visible
-    modelDetailsSection.style.display = 'block'; // Make details section visible
+    // Fetch and populate models immediately
+    await updateDropdownOptions(select);
+    
+    dropdown.appendChild(select);
+    return dropdown;
 }
 
-function createMetaItem(label, value) {
-    const metaItem = document.createElement('div');
-    metaItem.classList.add('meta-item');
+// New function to update dropdown options
+async function updateDropdownOptions(select) {
+    const CONFIG = getConfig();
+    try {
+        // Clear existing options except the default one
+        while (select.options.length > 1) {
+            select.remove(1);
+        }
 
-    const metaLabel = document.createElement('span');
-    metaLabel.classList.add('meta-label');
-    metaLabel.textContent = label;
+        // Show loading state
+        const loadingOption = document.createElement('option');
+        loadingOption.disabled = true;
+        loadingOption.textContent = 'Loading models...';
+        select.appendChild(loadingOption);
 
-    const metaValue = document.createElement('span');
-    metaValue.textContent = value || 'N/A';
+        // Fetch latest models
+        await fetchDownloadedModels();
+        
+        // Remove loading option
+        select.remove(select.options.length - 1);
 
-    metaItem.appendChild(metaLabel);
-    metaItem.appendChild(metaValue);
-    return metaItem;
+        // Filter and add downloaded models that are ready
+        const readyModels = Array.from(downloadedModels.entries())
+            .filter(([_, status]) => status === CONFIG.DOWNLOAD_STATUS.READY);
+        
+        if (readyModels.length === 0) {
+            const noModelsOption = document.createElement('option');
+            noModelsOption.disabled = true;
+            noModelsOption.textContent = 'No models available';
+            select.appendChild(noModelsOption);
+        } else {
+            readyModels.forEach(([modelId, _]) => {
+                const option = document.createElement('option');
+                option.value = modelId;
+                option.textContent = modelId;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error updating model options:', error);
+        const errorOption = document.createElement('option');
+        errorOption.disabled = true;
+        errorOption.textContent = 'Error loading models';
+        select.appendChild(errorOption);
+    }
+}
+
+async function fetchAndDisplayMyModels() {
+    const CONFIG = getConfig();
+    const modelListContainer = document.querySelector('.my-models .models-list');
+    if (!modelListContainer) return;
+
+    modelListContainer.innerHTML = '<div class="loading-message">Loading your models...</div>';
+
+    try {
+        // 1. First fetch downloaded models
+        const downloadResponse = await fetch(`${CONFIG.LOCAL_ENDPOINT}/models/download`);
+        if (!downloadResponse.ok) throw new Error(`HTTP error! status: ${downloadResponse.status}`);
+        const downloadData = await downloadResponse.json();
+        
+        // Filter for READY models and extract their IDs
+        const readyModelIds = downloadData
+            .filter(model => model.download_status === CONFIG.DOWNLOAD_STATUS.READY)
+            .map(model => model.model_id);
+
+        if (readyModelIds.length === 0) {
+            modelListContainer.innerHTML = '<div class="no-models-message">No downloaded models found.</div>';
+            return;
+        }
+
+        // 2. Fetch loaded/running models
+        const loadResponse = await fetch(`${CONFIG.LOCAL_ENDPOINT}/models/load`);
+        if (!loadResponse.ok) throw new Error(`HTTP error! status: ${loadResponse.status}`);
+        const loadedModels = await loadResponse.json();
+        const loadedModelIds = new Set(loadedModels);
+
+        // 3. Fetch detailed model information
+        const modelResponse = await fetch(`${CONFIG.BACKEND_ENDPOINT}/models/batch`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ids: readyModelIds  // Note: key is 'ids' not 'model_ids'
+            })
+        });
+        if (!modelResponse.ok) throw new Error(`HTTP error! status: ${modelResponse.status}`);
+        const modelData = await modelResponse.json();
+
+        // Clear container
+        modelListContainer.innerHTML = '';
+
+        // Create model items
+        modelData.models.forEach(model => {
+            const isRunning = loadedModelIds.has(model.model_id);
+            const modelItem = createMyModelItem(model, isRunning);
+            modelListContainer.appendChild(modelItem);
+        });
+
+    } catch (error) {
+        console.error('Error fetching my models:', error);
+        modelListContainer.innerHTML = '<div class="error-message">Failed to load models. Please try again.</div>';
+    }
+}
+
+function createMyModelItem(model, isRunning) {
+    const modelItem = document.createElement('div');
+    modelItem.className = 'model-item';
+    
+    const status = isRunning ? 'running' : 'downloaded';
+    const statusText = isRunning ? 'Running' : 'Downloaded';
+    const actionButton = isRunning ? 
+        `<button class="action-btn stop-btn">
+            <i class="fas fa-stop"></i>
+            <span>Stop</span>
+        </button>` :
+        `<button class="action-btn start-btn">
+            <i class="fas fa-play"></i>
+            <span>Start</span>
+        </button>`;
+
+    modelItem.innerHTML = `
+        <div class="model-info">
+            <div class="model-icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="model-details">
+                <h3>${model.model_id}</h3>
+                <span class="model-status ${status}">${statusText}</span>
+                <span class="model-meta">${isRunning ? 'Port: 3000 • Memory: 7GB' : `Size: ${model.size || 'N/A'} • Modified: ${new Date(model.last_modified).toLocaleDateString()}`}</span>
+            </div>
+        </div>
+        <div class="model-actions">
+            ${actionButton}
+            <button class="action-btn delete-btn">
+                <i class="fas fa-trash"></i>
+                <span>Delete</span>
+            </button>
+        </div>
+    `;
+
+    // Add event listeners for buttons
+    const startStopBtn = modelItem.querySelector('.start-btn, .stop-btn');
+    if (startStopBtn) {
+        startStopBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const CONFIG = getConfig();
+            const endpoint = isRunning ? 
+                `${CONFIG.LOCAL_ENDPOINT}/models/unload` : 
+                `${CONFIG.LOCAL_ENDPOINT}/models/load`;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ model_id: model.model_id })
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                // Refresh the display after action
+                fetchAndDisplayMyModels();
+            } catch (error) {
+                console.error('Error updating model status:', error);
+                alert('Failed to update model status. Please try again.');
+            }
+        });
+    }
+
+    const deleteBtn = modelItem.querySelector('.delete-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (confirm(`Are you sure you want to delete ${model.model_id}?`)) {
+                const CONFIG = getConfig();
+                try {
+                    const response = await fetch(`${CONFIG.LOCAL_ENDPOINT}/models/delete`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ model_id: model.model_id })
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    // Refresh the display after deletion
+                    fetchAndDisplayMyModels();
+                } catch (error) {
+                    console.error('Error deleting model:', error);
+                    alert('Failed to delete model. Please try again.');
+                }
+            }
+        });
+    }
+
+    return modelItem;
 }

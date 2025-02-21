@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8">
     <title>My AI Models App</title>
@@ -1693,654 +1693,817 @@
         align-items: center;
         gap: 4px;
       }
+
+      /* Add these styles at the beginning of your existing styles */
+      .loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #4f46e5;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+
+      .loading-text {
+        font-size: 18px;
+        color: #4f46e5;
+        font-weight: 500;
+      }
+
+      .loading-subtext {
+        font-size: 14px;
+        color: #6b7280;
+        margin-top: 8px;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      /* Add this to hide the main content initially */
+      .main-content {
+        display: none;  /* Initially hidden */
+        width: 100%;
+        height: 100vh;
+      }
+
+      /* When visible, use flex layout */
+      .main-content.visible {
+        display: flex;
+      }
+
+      /* Update model search specific styles */
+      .model-search {
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .model-search-content {
+        display: flex;
+        height: calc(100vh - 65px);  /* Subtract search bar height */
+        margin-top: 65px;
+      }
+
+      .model-list-section {
+        width: 40%;
+        min-width: 400px;
+        border-right: 1px solid #e5e7eb;
+        overflow-y: auto;
+        padding: 20px;
+      }
+
+      .model-details-section {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: block;  /* Always show */
+      }
+
+      /* Update search container positioning */
+      .search-container {
+        position: fixed;
+        top: 0;
+        left: 60px;  /* Account for sidebar width */
+        right: 0;
+        background: white;
+        padding: 12px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        z-index: 1000;
+      }
+
+      .loading-screen .docker-install-container {
+        margin-top: 20px;
+      }
+
+      .loading-screen .setup-docker-btn {
+        background: #2496ed;  /* Docker blue */
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .loading-screen .setup-docker-btn:hover {
+        background: #1d7ac4;
+        transform: translateY(-1px);
+      }
+
+      .loading-screen .success-icon {
+        color: #22c55e;
+        font-size: 24px;
+        margin-bottom: 16px;
+      }
+
+      /* Add transition for smooth icon swap */
+      .loading-spinner, .success-check {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 20px;
+        transition: opacity 0.3s ease-out;
+      }
+
+      .success-check {
+        color: #22c55e;
+        font-size: 50px;
+        display: none;
+        opacity: 0;
+      }
+
+      /* Update existing loading spinner style */
+      .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #4f46e5;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
     </style>
   </head>
   <body>
-    <div class="sidebar">
-      <div class="sidebar-icon voice">
-        <i class="fas fa-microphone"></i>
-        <div class="voice-dropdown">
-          <div class="voice-option"><i class="fas fa-comment-dots"></i> Text to Speech</div>
-          <div class="voice-option"><i class="fas fa-volume-up"></i> Text to SFX</div>
-          <div class="voice-option"><i class="fas fa-exchange-alt"></i> Voice Changer</div>
-          <div class="voice-option"><i class="fas fa-user-friends"></i> Voice Cloning</div>
-          
-        </div>
-      </div>
-      <!-- <div class="sidebar-icon image">
-        <i class="fas fa-image"></i>
-        <div class="voice-dropdown">
-          <div class="voice-option"><i class="fas fa-paint-brush"></i> Image Generation</div>
-          <div class="voice-option"><i class="fas fa-edit"></i> Image Editing</div>
-        </div>
-      </div> -->
-      <div class="sidebar-icon folder">
-        <i class="fas fa-folder"></i>
-        <div class="voice-dropdown">
-          <div class="voice-option"><i class="fas fa-folder-open"></i> My Models</div>
-        </div>
-      </div>
-      <div class="sidebar-icon search">
-        <i class="fas fa-search"></i>
-        <div class="voice-dropdown">
-          <div class="voice-option"><i class="fas fa-search"></i> Search Models</div>
-          <!-- <div class="voice-option"><i class="fas fa-history"></i> Search History</div> -->
-        </div>
-      </div>
-      <div class="sidebar-icon hardware">
-        <i class="fas fa-microchip"></i>
-        <div class="voice-dropdown">
-          
-          <div class="voice-option"><i class="fas fa-desktop"></i> System Info</div>
-          <div class="voice-option">⚙️ Runtimes</div>
-        </div>
+    <!-- Add the loading screen -->
+    <div class="loading-screen">
+      <div class="loading-spinner"></div>
+      <i class="fas fa-check-circle success-check"></i>
+      <div class="loading-text">Checking Docker Status</div>
+      <div class="loading-subtext" id="docker-status-text">Please wait...</div>
+      <div class="docker-install-container" style="display: none;">
+        <button class="setup-docker-btn">
+          <span>🐳</span> Setup Docker
+        </button>
       </div>
     </div>
-    <div class="content-area">
-      <div class="voice-content text-to-speech">
-        <div class="voice-header">
-          <h1>Text to Speech</h1>
-          <p>The TwelveLabs voice generator can deliver high-quality, human-like speech in 32 languages. Perfect for audiobooks, video voiceovers, commercials, and more.</p>
-        </div>
 
-        <div class="voice-actions">
-          <button class="action-button">
-            <i class="fas fa-book"></i> Tell a Story
-          </button>
-          <button class="action-button">
-            <i class="fas fa-podcast"></i> Introduce a Podcast
-          </button>
-          <button class="action-button">
-            <i class="fas fa-video"></i> Create a video voiceover
-          </button>
-        </div>
-
-        <div class="input-container">
-          <textarea class="text-input" id="text-input" placeholder="Type something..."></textarea>
-          
-          <!-- Audio Controls - Positioned between textarea and Generate button -->
-          <div class="audio-controls" style="display: none;">
-            <div class="audio-progress">
-              <div class="progress-bar">
-                <div class="progress"></div>
-              </div>
-              <div class="progress-time">
-                <span class="current-time">0:00</span>
-                <span class="duration">0:00</span>
-              </div>
-            </div>
-            <div class="control-buttons">
-              <button class="control-btn" id="playPauseBtn">
-                <i class="fas fa-pause"></i>
-              </button>
-              <button class="control-btn" id="stopBtn">
-                <i class="fas fa-stop"></i>
-              </button>
-              <div class="volume-control">
-                <i class="fas fa-volume-up"></i>
-                <input type="range" id="volumeSlider" min="0" max="100" value="100">
-              </div>
-            </div>
+    <!-- Wrap the existing content in a main-content div -->
+    <div class="main-content">
+      <div class="sidebar">
+        <div class="sidebar-icon voice">
+          <i class="fas fa-microphone"></i>
+          <div class="voice-dropdown">
+            <div class="voice-option"><i class="fas fa-comment-dots"></i> Text to Speech</div>
+            <div class="voice-option"><i class="fas fa-volume-up"></i> Text to SFX</div>
+            <div class="voice-option"><i class="fas fa-exchange-alt"></i> Voice Changer</div>
+            <div class="voice-option"><i class="fas fa-user-friends"></i> Voice Cloning</div>
+            
           </div>
-
-          <div class="button-container">
-            <button class="generate-button">
-              <i class="fas fa-play"></i> Generate
-            </button>
+        </div>
+        <!-- <div class="sidebar-icon image">
+          <i class="fas fa-image"></i>
+          <div class="voice-dropdown">
+            <div class="voice-option"><i class="fas fa-paint-brush"></i> Image Generation</div>
+            <div class="voice-option"><i class="fas fa-edit"></i> Image Editing</div>
+          </div>
+        </div> -->
+        <div class="sidebar-icon folder">
+          <i class="fas fa-folder"></i>
+          <div class="voice-dropdown">
+            <div class="voice-option"><i class="fas fa-folder-open"></i> My Models</div>
+          </div>
+        </div>
+        <div class="sidebar-icon search">
+          <i class="fas fa-search"></i>
+          <div class="voice-dropdown">
+            <div class="voice-option"><i class="fas fa-search"></i> Search Models</div>
+            <!-- <div class="voice-option"><i class="fas fa-history"></i> Search History</div> -->
+          </div>
+        </div>
+        <div class="sidebar-icon hardware">
+          <i class="fas fa-microchip"></i>
+          <div class="voice-dropdown">
+            
+            <div class="voice-option"><i class="fas fa-desktop"></i> System Info</div>
+            <div class="voice-option">⚙️ Runtimes</div>
           </div>
         </div>
       </div>
-
-      <div class="voice-content text-to-sfx">
-        <div class="voice-header">
-          <h1>Text to SFX</h1>
-          <p>Convert text into sound effects. Perfect for creating custom notifications, alerts, and audio cues.</p>
-        </div>
-        
-        <div class="voice-actions">
-          <button class="action-button">
-            <i class="fas fa-bell"></i> Create Notification
-          </button>
-          <button class="action-button">
-            <i class="fas fa-gamepad"></i> Game Sound
-          </button>
-          <button class="action-button">
-            <i class="fas fa-music"></i> Musical Effect
-          </button>
-        </div>
-
-        <div class="input-container">
-          <div class="selector-row">
-            <div class="selector effect-select">
-              <div class="voice-avatar">
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=effect" alt="Effect" class="avatar-icon">
-              </div>
-              <span>Notification</span>
-              <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
-              <div class="voice-model-dropdown">
-                <div class="voice-model-option">
-                  <div class="voice-avatar">
-                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=notification" alt="Notification" class="avatar-icon">
-                  </div>
-                  <span>Notification</span>
-                </div>
-                <div class="voice-model-option">
-                  <div class="voice-avatar">
-                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=alert" alt="Alert" class="avatar-icon">
-                  </div>
-                  <span>Alert</span>
-                </div>
-                <div class="voice-model-option">
-                  <div class="voice-avatar">
-                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=game" alt="Game Effect" class="avatar-icon">
-                  </div>
-                  <span>Game Effect</span>
-                </div>
-              </div>
-            </div>
-            <span class="character-count">0/500</span>
+      <div class="content-area">
+        <div class="voice-content text-to-speech">
+          <div class="voice-header">
+            <h1>Text to Speech</h1>
+            <p>The TwelveLabs voice generator can deliver high-quality, human-like speech in 32 languages. Perfect for audiobooks, video voiceovers, commercials, and more.</p>
           </div>
-          
-          <textarea class="text-input" id="sfx-input" placeholder="Type something..."></textarea>
-          
-          <div class="button-container">
-            <button class="generate-button">
-              <i class="fas fa-play"></i> Generate
+
+          <div class="voice-actions">
+            <button class="action-button">
+              <i class="fas fa-book"></i> Tell a Story
+            </button>
+            <button class="action-button">
+              <i class="fas fa-podcast"></i> Introduce a Podcast
+            </button>
+            <button class="action-button">
+              <i class="fas fa-video"></i> Create a video voiceover
             </button>
           </div>
-        </div>
-      </div>
 
-      <div class="voice-content voice-changer">
-        <div class="voice-header">
-          <h1>Voice Changer</h1>
-          <p>Transform your voice with real-time voice modification. Create unique character voices or modify existing audio.</p>
-        </div>
-
-        <div class="voice-actions">
-          <button class="action-button">
-            <i class="fas fa-microphone"></i> Record Voice
-          </button>
-          <button class="action-button">
-            <i class="fas fa-upload"></i> Upload Audio
-          </button>
-        </div>
-
-        <div class="input-container">
-          <!-- File info will appear here when uploaded -->
-          <div class="controls-section">
-            <div class="effect-controls">
-              <div class="effect-slider">
-                <div class="slider-header">
-                  <label>Pitch</label>
-                  <span class="slider-value">50</span>
+          <div class="input-container">
+            <textarea class="text-input" id="text-input" placeholder="Type something..."></textarea>
+            
+            <!-- Audio Controls - Positioned between textarea and Generate button -->
+            <div class="audio-controls" style="display: none;">
+              <div class="audio-progress">
+                <div class="progress-bar">
+                  <div class="progress"></div>
                 </div>
-                <input type="range" min="0" max="100" value="50" id="pitch-slider">
+                <div class="progress-time">
+                  <span class="current-time">0:00</span>
+                  <span class="duration">0:00</span>
+                </div>
               </div>
-              <div class="effect-slider">
-                <div class="slider-header">
-                  <label>Speed</label>
-                  <span class="slider-value">50</span>
+              <div class="control-buttons">
+                <button class="control-btn" id="playPauseBtn">
+                  <i class="fas fa-pause"></i>
+                </button>
+                <button class="control-btn" id="stopBtn">
+                  <i class="fas fa-stop"></i>
+                </button>
+                <div class="volume-control">
+                  <i class="fas fa-volume-up"></i>
+                  <input type="range" id="volumeSlider" min="0" max="100" value="100">
                 </div>
-                <input type="range" min="0" max="100" value="50" id="speed-slider">
               </div>
             </div>
+
+            <div class="button-container">
+              <button class="generate-button">
+                <i class="fas fa-play"></i> Generate
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="voice-content text-to-sfx">
+          <div class="voice-header">
+            <h1>Text to SFX</h1>
+            <p>Convert text into sound effects. Perfect for creating custom notifications, alerts, and audio cues.</p>
+          </div>
+          
+          <div class="voice-actions">
+            <button class="action-button">
+              <i class="fas fa-bell"></i> Create Notification
+            </button>
+            <button class="action-button">
+              <i class="fas fa-gamepad"></i> Game Sound
+            </button>
+            <button class="action-button">
+              <i class="fas fa-music"></i> Musical Effect
+            </button>
+          </div>
+
+          <div class="input-container">
+            <div class="selector-row">
+              <div class="selector effect-select">
+                <div class="voice-avatar">
+                  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=effect" alt="Effect" class="avatar-icon">
+                </div>
+                <span>Notification</span>
+                <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                <div class="voice-model-dropdown">
+                  <div class="voice-model-option">
+                    <div class="voice-avatar">
+                      <img src="https://api.dicebear.com/7.x/bottts/svg?seed=notification" alt="Notification" class="avatar-icon">
+                    </div>
+                    <span>Notification</span>
+                  </div>
+                  <div class="voice-model-option">
+                    <div class="voice-avatar">
+                      <img src="https://api.dicebear.com/7.x/bottts/svg?seed=alert" alt="Alert" class="avatar-icon">
+                    </div>
+                    <span>Alert</span>
+                  </div>
+                  <div class="voice-model-option">
+                    <div class="voice-avatar">
+                      <img src="https://api.dicebear.com/7.x/bottts/svg?seed=game" alt="Game Effect" class="avatar-icon">
+                    </div>
+                    <span>Game Effect</span>
+                  </div>
+                </div>
+              </div>
+              <span class="character-count">0/500</span>
+            </div>
+            
+            <textarea class="text-input" id="sfx-input" placeholder="Type something..."></textarea>
             
             <div class="button-container">
               <button class="generate-button">
-                <i class="fas fa-play"></i> Preview
+                <i class="fas fa-play"></i> Generate
               </button>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="voice-content voice-cloning">
-        <div class="voice-header">
-          <h1>Voice Cloning</h1>
-          <p>Create a digital copy of any voice with just a few minutes of audio samples.</p>
-        </div>
-
-        <div class="voice-actions">
-          <button class="action-button">
-            <i class="fas fa-microphone"></i> Record Voice
-          </button>
-          <button class="action-button">
-            <i class="fas fa-upload"></i> Upload Audio
-          </button>
-        </div>
-
-        <div class="input-container">
-          <!-- Audio container will be inserted here -->
-          <div class="selector-row">
-            <div class="selector language-select">
-              <div class="flag-container">
-                <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/us.svg" alt="English" class="flag-icon">
-              </div>
-              <span>English</span>
-              <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
-              <div class="language-dropdown">
-                <div class="language-option">
-                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/us.svg" alt="English" class="flag-icon">
-                  <span>English</span>
-                </div>
-                <div class="language-option">
-                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/es.svg" alt="Spanish" class="flag-icon">
-                  <span>Spanish</span>
-                </div>
-                <div class="language-option">
-                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/fr.svg" alt="French" class="flag-icon">
-                  <span>French</span>
-                </div>
-                <div class="language-option">
-                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/de.svg" alt="German" class="flag-icon">
-                  <span>German</span>
-                </div>
-                <div class="language-option">
-                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/it.svg" alt="Italian" class="flag-icon">
-                  <span>Italian</span>
-                </div>
-              </div>
-            </div>
-            <span class="character-count">0/500</span>
+        <div class="voice-content voice-changer">
+          <div class="voice-header">
+            <h1>Voice Changer</h1>
+            <p>Transform your voice with real-time voice modification. Create unique character voices or modify existing audio.</p>
           </div>
 
-          <textarea class="text-input" id="cloning-input" placeholder="Type something to say in the cloned voice..."></textarea>
-
-          <div class="button-container">
-            <button class="generate-button">
-              <i class="fas fa-play"></i> Generate
+          <div class="voice-actions">
+            <button class="action-button">
+              <i class="fas fa-microphone"></i> Record Voice
+            </button>
+            <button class="action-button">
+              <i class="fas fa-upload"></i> Upload Audio
             </button>
           </div>
-        </div>
-      </div>
 
-      <div class="voice-content model-search">
-        <!-- Search bar section -->
-        <div class="search-container">
-          <div class="search-bar">
-            <div class="search-input-container">
-              <input type="text" placeholder="Search for models on Hugging Face..." class="model-search-input" id="modelSearchInput">
-              <button class="clear-search">×</button>
+          <div class="input-container">
+            <!-- File info will appear here when uploaded -->
+            <div class="controls-section">
+              <div class="effect-controls">
+                <div class="effect-slider">
+                  <div class="slider-header">
+                    <label>Pitch</label>
+                    <span class="slider-value">50</span>
+                  </div>
+                  <input type="range" min="0" max="100" value="50" id="pitch-slider">
+                </div>
+                <div class="effect-slider">
+                  <div class="slider-header">
+                    <label>Speed</label>
+                    <span class="slider-value">50</span>
+                  </div>
+                  <input type="range" min="0" max="100" value="50" id="speed-slider">
+                </div>
+              </div>
+              
+              <div class="button-container">
+                <button class="generate-button">
+                  <i class="fas fa-play"></i> Preview
+                </button>
+              </div>
             </div>
-            <label class="gguf-checkbox">
-              <input type="checkbox" checked>
-              <span>GGUF</span>
-              <span class="info-icon"><i class="fas fa-info-circle"></i></span>
-            </label>
-            <button class="expand-button">⤢</button>
-            <button class="close-button">×</button>
           </div>
         </div>
 
-        <div class="model-search-content">
-          <!-- Left Section: Model List -->
-          <div class="model-list-section">
-            <div class="list-header">
-              <span>Showing staff picks</span>
-              <div class="filter-controls">
-                <select class="sort-select">
-                  <option>Best Match</option>
-                  <option>Most Recent</option>
-                  <option>Most Downloaded</option>
-                </select>
-                <button class="download-btn">⬇</button>
-              </div>
-            </div>
-            
-            <div class="model-list">
-              <div class="model-list-item selected">
-                <div class="model-list-header">
-                  <div class="model-icon">🤖</div>
-                  <div class="model-title">Qwen2.5 7B Instruct 1M</div>
-                  <div class="model-tag">GGUF</div>
-                </div>
-                <p class="model-description">Powerful general purpose instruct model with up to 1 million tokens context</p>
-              </div>
-              <!-- More model items -->
-            </div>
+        <div class="voice-content voice-cloning">
+          <div class="voice-header">
+            <h1>Voice Cloning</h1>
+            <p>Create a digital copy of any voice with just a few minutes of audio samples.</p>
           </div>
 
-          <!-- Right Section: Model Details -->
-          <div class="model-details-section">
-            <!-- LM Studio Staff Pick Banner -->
-            <div class="staff-pick-banner">
-              <h3>LM Studio Staff Pick</h3>
-              <p>Powerful general purpose instruct model with up to 1 million tokens context</p>
-            </div>
+          <div class="voice-actions">
+            <button class="action-button">
+              <i class="fas fa-microphone"></i> Record Voice
+            </button>
+            <button class="action-button">
+              <i class="fas fa-upload"></i> Upload Audio
+            </button>
+          </div>
 
-            <!-- Model Metadata -->
-            <div class="model-metadata">
-              <div class="meta-row">
-                <div class="meta-item">
-                  <span class="meta-label">Architecture:</span>
-                  <span class="qwen-tag">qwen</span>
+          <div class="input-container">
+            <!-- Audio container will be inserted here -->
+            <div class="selector-row">
+              <div class="selector language-select">
+                <div class="flag-container">
+                  <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/us.svg" alt="English" class="flag-icon">
                 </div>
-                <div class="meta-item">
-                  <span class="meta-label">Params:</span>
-                  <span class="param-value">7B</span>
-                </div>
-                <div class="meta-item">
-                  <span class="meta-label">Stats:</span>
-                  <div class="stats-group">
-                    <span><i class="fas fa-heart"></i> 20</span>
-                    <span><i class="fas fa-download"></i> 104061</span>
+                <span>English</span>
+                <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                <div class="language-dropdown">
+                  <div class="language-option">
+                    <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/us.svg" alt="English" class="flag-icon">
+                    <span>English</span>
+                  </div>
+                  <div class="language-option">
+                    <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/es.svg" alt="Spanish" class="flag-icon">
+                    <span>Spanish</span>
+                  </div>
+                  <div class="language-option">
+                    <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/fr.svg" alt="French" class="flag-icon">
+                    <span>French</span>
+                  </div>
+                  <div class="language-option">
+                    <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/de.svg" alt="German" class="flag-icon">
+                    <span>German</span>
+                  </div>
+                  <div class="language-option">
+                    <img src="https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/it.svg" alt="Italian" class="flag-icon">
+                    <span>Italian</span>
                   </div>
                 </div>
-                <div class="meta-item">
-                  <span class="meta-label">Last updated:</span>
-                  <span>18 days ago</span>
-                </div>
               </div>
+              <span class="character-count">0/500</span>
             </div>
 
-            <!-- Download Options -->
-            <div class="download-section">
-              <div class="download-header">
-                <span>4 download options available</span>
-                <span class="info-icon"><i class="fas fa-info-circle"></i></span>
-              </div>
-              <div class="download-item">
-                <div class="file-info">
-                  <span class="file-name">Q4_K_M</span>
-                  <span class="model-name">Qwen2.5 7B Instruct 1M</span>
-                </div>
-                <div class="file-actions">
-                  <button class="copy-btn"><i class="fas fa-clipboard"></i></button>
-                  <button class="like-btn"><i class="fas fa-thumbs-up"></i></button>
-                  <span class="file-size">4.68 GB</span>
-                  <button class="expand-btn"><i class="fas fa-chevron-down"></i></button>
-                </div>
-              </div>
-            </div>
+            <textarea class="text-input" id="cloning-input" placeholder="Type something to say in the cloned voice..."></textarea>
 
-            <!-- Model Readme -->
-            <div class="model-readme">
-              <div class="readme-header">
-                <h3>Model Readme</h3>
-                <span class="source-text">Pulled from the model's repository</span>
-              </div>
-              <div class="readme-content">
-                <h2><i class="fas fa-robot"></i> Community Model> Qwen2.5 7B Instruct 1M by Qwen</h2>
-                <p><i class="fas fa-alpaca"></i> LM Studio Community models highlights program...</p>
-                
-                <div class="model-info">
-                  <p><strong>Model creator:</strong> Qwen</p>
-                  <p><strong>Original model:</strong> Qwen2.5-7B-Instruct-1M</p>
-                  <p><strong>GGUF quantization:</strong> provided by bartowski based on llama.cpp release b4546</p>
-                </div>
-
-                <h3>Technical Details</h3>
-                <p>Supports a context length of up to 1M tokens.</p>
-              </div>
+            <div class="button-container">
+              <button class="generate-button">
+                <i class="fas fa-play"></i> Generate
+              </button>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="voice-content hardware-section">
-        <div class="voice-header">
-          <h1>Hardware</h1>
-          <p>Monitor system resources and optimize performance for AI model inference.</p>
-        </div>
-
-        <div class="voice-actions">
-          <button class="action-button">
-            <i class="fas fa-chart-line"></i> Performance
-          </button>
-        </div>
-
-        <div class="input-container">
-          <div class="controls-section">
-            <div class="effect-controls">
-              <div class="effect-slider">
-                <div class="slider-header">
-                  <label>CPU Usage</label>
-                  <span class="slider-value">32%</span>
-                </div>
-                <input type="range" min="0" max="100" value="32" id="cpu-slider" disabled>
-              </div>
-              <div class="effect-slider">
-                <div class="slider-header">
-                  <label>Memory Usage</label>
-                  <span class="slider-value">45%</span>
-                </div>
-                <input type="range" min="0" max="100" value="45" id="memory-slider" disabled>
-              </div>
-              <div class="effect-slider">
-                <div class="slider-header">
-                  <label>GPU Usage</label>
-                  <span class="slider-value">78%</span>
-                </div>
-                <input type="range" min="0" max="100" value="78" id="gpu-slider" disabled>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="voice-content system-info">
-        <div class="system-info-header">
-          <h1>System Resources</h1>
-        </div>
-        <div class="system-info-actions">
-          <button class="info-action-btn">Copy Info</button>
-          <button class="info-action-btn">Community</button>
-        </div>
-        <div class="system-info-grid">
-          <!-- CPU Section -->
-          <div class="info-card">
-            <div class="info-header">
-              <h2>CPU <span class="info-icon"><i class="fas fa-info-circle"></i></span></h2>
-              <span class="compatibility-badge">Checking...</span>
-            </div>
-            <div class="info-content">
-              <div class="info-row">
-                <span class="info-label">Architecture</span>
-                <span class="info-value">
-                  <span class="chip-badge">Loading...</span>
-                </span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Instruction Set Extensions</span>
-                <div class="chip-group">
-                  <!-- Will be populated by JS -->
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- GPUs Section -->
-          <div class="info-card">
-            <div class="info-header">
-              <h2>GPUs <span class="info-icon"><i class="fas fa-info-circle"></i></span></h2>
-              <span class="gpu-count">Detecting GPUs...</span>
-            </div>
-            <div class="info-content">
-              <div class="info-row">
-                <span class="gpu-model">Loading GPU info...</span>
-                <span class="chip-badge cuda">-</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">VRAM Capacity</span>
-                <span class="info-value">-</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Memory Capacity Section -->
-          <div class="info-card">
-            <div class="info-header">
-              <h2>Memory Capacity <span class="info-icon"><i class="fas fa-info-circle"></i></span></h2>
-            </div>
-            <div class="info-content">
-              <div class="info-row">
-                <span class="info-label">RAM</span>
-                <span class="info-value">-</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">VRAM</span>
-                <span class="info-value">-</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Guardrails Section -->
-          <div class="info-card">
-            <div class="info-header">
-              <h2>Guardrails <span class="info-icon"><i class="fas fa-info-circle"></i></span></h2>
-            </div>
-            <div class="info-content">
-              <div class="info-row">
-                <span class="info-label">Model loading guardrails</span>
-              </div>
-              <div class="guardrail-selector">
-                <div class="selected-guardrail">
-                  <span>Strict</span>
-                  <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
-                </div>
-                <p class="guardrail-description">Strong precautions against system overload</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Resource Monitor Section -->
-          <div class="info-card full-width">
-            <div class="info-header">
-              <h2>Resource Monitor</h2>
-              <span class="monitor-note">Best approximation. May differ from other monitors</span>
-            </div>
-            <div class="monitor-grid">
-              <div class="monitor-card">
-                <span class="monitor-label">RAM + VRAM</span>
-                <span class="monitor-value">-</span>
-              </div>
-              <div class="monitor-card">
-                <span class="monitor-label">CPU</span>
-                <span class="monitor-value">-</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="voice-content runtimes">
-        <div class="content-header">
-          <h2>Runtimes</h2>
-          <p>Manage your runtime environments</p>
-        </div>
-        <div class="runtime-container">
-          <button class="action-button check-docker">
-            <span>🐳</span> Check Docker Installation
-          </button>
-          <div class="docker-status"></div>
-          <div class="terminal-window">
-            <div class="terminal-header">
-              <span class="terminal-title"></span>
-              <div class="terminal-buttons">
-                <span class="terminal-button"></span>
-                <span class="terminal-button"></span>
-                <span class="terminal-button"></span>
-              </div>
-            </div>
-            <div class="terminal-content">
-              <div class="terminal-output"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="voice-content my-models">
-        <div class="models-header">
+        <div class="voice-content model-search">
+          <!-- Search bar section -->
           <div class="search-container">
             <div class="search-bar">
-              <i class="fas fa-search"></i>
-              <input type="text" placeholder="Filter models..." id="modelFilterInput">
+              <div class="search-input-container">
+                <input type="text" placeholder="Search for models on Hugging Face..." class="model-search-input" id="modelSearchInput">
+                <button class="clear-search">×</button>
+              </div>
+              <label class="gguf-checkbox">
+                <input type="checkbox" checked>
+                <span>GGUF</span>
+                <span class="info-icon"><i class="fas fa-info-circle"></i></span>
+              </label>
+              <button class="expand-button">⤢</button>
+              <button class="close-button">×</button>
+            </div>
+          </div>
+
+          <div class="model-search-content">
+            <!-- Left Section: Model List -->
+            <div class="model-list-section">
+              <div class="list-header">
+                <span>Showing staff picks</span>
+                <div class="filter-controls">
+                  <select class="sort-select">
+                    <option>Best Match</option>
+                    <option>Most Recent</option>
+                    <option>Most Downloaded</option>
+                  </select>
+                  <button class="download-btn">⬇</button>
+                </div>
+              </div>
+              
+              <div class="model-list">
+                <div class="model-list-item selected">
+                  <div class="model-list-header">
+                    <div class="model-icon">🤖</div>
+                    <div class="model-title">Qwen2.5 7B Instruct 1M</div>
+                    <div class="model-tag">GGUF</div>
+                  </div>
+                  <p class="model-description">Powerful general purpose instruct model with up to 1 million tokens context</p>
+                </div>
+                <!-- More model items -->
+              </div>
+            </div>
+
+            <!-- Right Section: Model Details -->
+            <div class="model-details-section">
+              <!-- LM Studio Staff Pick Banner -->
+              <div class="staff-pick-banner">
+                <h3>LM Studio Staff Pick</h3>
+                <p>Powerful general purpose instruct model with up to 1 million tokens context</p>
+              </div>
+
+              <!-- Model Metadata -->
+              <div class="model-metadata">
+                <div class="meta-row">
+                  <div class="meta-item">
+                    <span class="meta-label">Architecture:</span>
+                    <span class="qwen-tag">qwen</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Params:</span>
+                    <span class="param-value">7B</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Stats:</span>
+                    <div class="stats-group">
+                      <span><i class="fas fa-heart"></i> 20</span>
+                      <span><i class="fas fa-download"></i> 104061</span>
+                    </div>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Last updated:</span>
+                    <span>18 days ago</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Download Options -->
+              <div class="download-section">
+                <div class="download-header">
+                  <span>4 download options available</span>
+                  <span class="info-icon"><i class="fas fa-info-circle"></i></span>
+                </div>
+                <div class="download-item">
+                  <div class="file-info">
+                    <span class="file-name">Q4_K_M</span>
+                    <span class="model-name">Qwen2.5 7B Instruct 1M</span>
+                  </div>
+                  <div class="file-actions">
+                    <button class="copy-btn"><i class="fas fa-clipboard"></i></button>
+                    <button class="like-btn"><i class="fas fa-thumbs-up"></i></button>
+                    <span class="file-size">4.68 GB</span>
+                    <button class="expand-btn"><i class="fas fa-chevron-down"></i></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Model Readme -->
+              <div class="model-readme">
+                <div class="readme-header">
+                  <h3>Model Readme</h3>
+                  <span class="source-text">Pulled from the model's repository</span>
+                </div>
+                <div class="readme-content">
+                  <h2><i class="fas fa-robot"></i> Community Model> Qwen2.5 7B Instruct 1M by Qwen</h2>
+                  <p><i class="fas fa-alpaca"></i> LM Studio Community models highlights program...</p>
+                  
+                  <div class="model-info">
+                    <p><strong>Model creator:</strong> Qwen</p>
+                    <p><strong>Original model:</strong> Qwen2.5-7B-Instruct-1M</p>
+                    <p><strong>GGUF quantization:</strong> provided by bartowski based on llama.cpp release b4546</p>
+                  </div>
+
+                  <h3>Technical Details</h3>
+                  <p>Supports a context length of up to 1M tokens.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        
-        <div class="models-list">
-          <!-- First model - Running -->
-          <div class="model-item">
-            <div class="model-info">
-              <div class="model-icon">
-                <i class="fas fa-brain"></i>
-              </div>
-              <div class="model-details">
-                <h3>Llama-2-7b-chat</h3>
-                <span class="model-status running">Running</span>
-                <span class="model-meta">Port: 3000 • Memory: 7GB</span>
-              </div>
-            </div>
-            <div class="model-actions">
-              <button class="action-btn stop-btn">
-                <i class="fas fa-stop"></i>
-                <span>Stop</span>
-              </button>
-              <button class="action-btn restart-btn">
-                <i class="fas fa-redo"></i>
-                <span>Restart</span>
-              </button>
-              <button class="action-btn delete-btn">
-                <i class="fas fa-trash"></i>
-                <span>Delete</span>
-              </button>
-            </div>
+
+        <div class="voice-content hardware-section">
+          <div class="voice-header">
+            <h1>Hardware</h1>
+            <p>Monitor system resources and optimize performance for AI model inference.</p>
           </div>
 
-          <!-- Second model - Downloaded -->
-          <div class="model-item">
-            <div class="model-info">
-              <div class="model-icon">
-                <i class="fas fa-brain"></i>
-              </div>
-              <div class="model-details">
-                <h3>Mistral-7B-Instruct-v0.2</h3>
-                <span class="model-status downloaded">Downloaded</span>
-                <span class="model-meta">Size: 4.1GB • Modified: 2 days ago</span>
-              </div>
-            </div>
-            <div class="model-actions">
-              <button class="action-btn start-btn">
-                <i class="fas fa-play"></i>
-                <span>Start</span>
-              </button>
-              <button class="action-btn delete-btn">
-                <i class="fas fa-trash"></i>
-                <span>Delete</span>
-              </button>
-            </div>
+          <div class="voice-actions">
+            <button class="action-button">
+              <i class="fas fa-chart-line"></i> Performance
+            </button>
           </div>
 
-          <!-- Third model - Loaded -->
-          <div class="model-item">
-            <div class="model-info">
-              <div class="model-icon">
-                <i class="fas fa-brain"></i>
-              </div>
-              <div class="model-details">
-                <h3>Phi-2</h3>
-                <span class="model-status loaded">Loaded</span>
-                <span class="model-meta">Port: 3001 • Memory: 2.7GB</span>
+          <div class="input-container">
+            <div class="controls-section">
+              <div class="effect-controls">
+                <div class="effect-slider">
+                  <div class="slider-header">
+                    <label>CPU Usage</label>
+                    <span class="slider-value">32%</span>
+                  </div>
+                  <input type="range" min="0" max="100" value="32" id="cpu-slider" disabled>
+                </div>
+                <div class="effect-slider">
+                  <div class="slider-header">
+                    <label>Memory Usage</label>
+                    <span class="slider-value">45%</span>
+                  </div>
+                  <input type="range" min="0" max="100" value="45" id="memory-slider" disabled>
+                </div>
+                <div class="effect-slider">
+                  <div class="slider-header">
+                    <label>GPU Usage</label>
+                    <span class="slider-value">78%</span>
+                  </div>
+                  <input type="range" min="0" max="100" value="78" id="gpu-slider" disabled>
+                </div>
               </div>
             </div>
-            <div class="model-actions">
-              <button class="action-btn start-btn">
-                <i class="fas fa-play"></i>
-                <span>Start</span>
-              </button>
-              <button class="action-btn delete-btn">
-                <i class="fas fa-trash"></i>
-                <span>Delete</span>
-              </button>
+          </div>
+        </div>
+
+        <div class="voice-content system-info">
+          <div class="system-info-header">
+            <h1>System Resources</h1>
+          </div>
+          <div class="system-info-actions">
+            <button class="info-action-btn">Copy Info</button>
+            <button class="info-action-btn">Community</button>
+          </div>
+          <div class="system-info-grid">
+            <!-- CPU Section -->
+            <div class="info-card">
+              <div class="info-header">
+                <h2>CPU <span class="info-icon"><i class="fas fa-info-circle"></i></span></h2>
+                <span class="compatibility-badge">Checking...</span>
+              </div>
+              <div class="info-content">
+                <div class="info-row">
+                  <span class="info-label">Architecture</span>
+                  <span class="info-value">
+                    <span class="chip-badge">Loading...</span>
+                  </span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Instruction Set Extensions</span>
+                  <div class="chip-group">
+                    <!-- Will be populated by JS -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- GPUs Section -->
+            <div class="info-card">
+              <div class="info-header">
+                <h2>GPUs <span class="info-icon"><i class="fas fa-info-circle"></i></span></h2>
+                <span class="gpu-count">Detecting GPUs...</span>
+              </div>
+              <div class="info-content">
+                <div class="info-row">
+                  <span class="gpu-model">Loading GPU info...</span>
+                  <span class="chip-badge cuda">-</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">VRAM Capacity</span>
+                  <span class="info-value">-</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Memory Capacity Section -->
+            <div class="info-card">
+              <div class="info-header">
+                <h2>Memory Capacity <span class="info-icon"><i class="fas fa-info-circle"></i></span></h2>
+              </div>
+              <div class="info-content">
+                <div class="info-row">
+                  <span class="info-label">RAM</span>
+                  <span class="info-value">-</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">VRAM</span>
+                  <span class="info-value">-</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Guardrails Section -->
+            <div class="info-card">
+              <div class="info-header">
+                <h2>Guardrails <span class="info-icon"><i class="fas fa-info-circle"></i></span></h2>
+              </div>
+              <div class="info-content">
+                <div class="info-row">
+                  <span class="info-label">Model loading guardrails</span>
+                </div>
+                <div class="guardrail-selector">
+                  <div class="selected-guardrail">
+                    <span>Strict</span>
+                    <span class="dropdown-arrow"><i class="fas fa-chevron-down"></i></span>
+                  </div>
+                  <p class="guardrail-description">Strong precautions against system overload</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resource Monitor Section -->
+            <div class="info-card full-width">
+              <div class="info-header">
+                <h2>Resource Monitor</h2>
+                <span class="monitor-note">Best approximation. May differ from other monitors</span>
+              </div>
+              <div class="monitor-grid">
+                <div class="monitor-card">
+                  <span class="monitor-label">RAM + VRAM</span>
+                  <span class="monitor-value">-</span>
+                </div>
+                <div class="monitor-card">
+                  <span class="monitor-label">CPU</span>
+                  <span class="monitor-value">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="voice-content runtimes">
+          <div class="content-header">
+            <h2>Runtimes</h2>
+            <p>Manage your runtime environments</p>
+          </div>
+          <div class="runtime-container">
+            <button class="action-button check-docker">
+              <span>🐳</span> Check Docker Installation
+            </button>
+            <div class="docker-status"></div>
+            <div class="terminal-window">
+              <div class="terminal-header">
+                <span class="terminal-title"></span>
+                <div class="terminal-buttons">
+                  <span class="terminal-button"></span>
+                  <span class="terminal-button"></span>
+                  <span class="terminal-button"></span>
+                </div>
+              </div>
+              <div class="terminal-content">
+                <div class="terminal-output"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="voice-content my-models">
+          <div class="models-header">
+            <div class="search-container">
+              <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Filter models..." id="modelFilterInput">
+              </div>
+            </div>
+          </div>
+          
+          <div class="models-list">
+            <!-- First model - Running -->
+            <div class="model-item">
+              <div class="model-info">
+                <div class="model-icon">
+                  <i class="fas fa-brain"></i>
+                </div>
+                <div class="model-details">
+                  <h3>Llama-2-7b-chat</h3>
+                  <span class="model-status running">Running</span>
+                  <span class="model-meta">Port: 3000 • Memory: 7GB</span>
+                </div>
+              </div>
+              <div class="model-actions">
+                <button class="action-btn stop-btn">
+                  <i class="fas fa-stop"></i>
+                  <span>Stop</span>
+                </button>
+                <button class="action-btn restart-btn">
+                  <i class="fas fa-redo"></i>
+                  <span>Restart</span>
+                </button>
+                <button class="action-btn delete-btn">
+                  <i class="fas fa-trash"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Second model - Downloaded -->
+            <div class="model-item">
+              <div class="model-info">
+                <div class="model-icon">
+                  <i class="fas fa-brain"></i>
+                </div>
+                <div class="model-details">
+                  <h3>Mistral-7B-Instruct-v0.2</h3>
+                  <span class="model-status downloaded">Downloaded</span>
+                  <span class="model-meta">Size: 4.1GB • Modified: 2 days ago</span>
+                </div>
+              </div>
+              <div class="model-actions">
+                <button class="action-btn start-btn">
+                  <i class="fas fa-play"></i>
+                  <span>Start</span>
+                </button>
+                <button class="action-btn delete-btn">
+                  <i class="fas fa-trash"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Third model - Loaded -->
+            <div class="model-item">
+              <div class="model-info">
+                <div class="model-icon">
+                  <i class="fas fa-brain"></i>
+                </div>
+                <div class="model-details">
+                  <h3>Phi-2</h3>
+                  <span class="model-status loaded">Loaded</span>
+                  <span class="model-meta">Port: 3001 • Memory: 2.7GB</span>
+                </div>
+              </div>
+              <div class="model-actions">
+                <button class="action-btn start-btn">
+                  <i class="fas fa-play"></i>
+                  <span>Start</span>
+                </button>
+                <button class="action-btn delete-btn">
+                  <i class="fas fa-trash"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <script src="renderer.js"></script>
-    <script src="runtime.js"></script>
-  </body>
+  <script src="renderer.js"></script>
+  <script src="runtime.js"></script>
+</body>
 </html> 
