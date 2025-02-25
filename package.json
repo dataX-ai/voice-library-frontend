@@ -1,80 +1,47 @@
 {
-  "name": "voice-studio",
+  "name": "voice-studio-app",
+  "productName": "VoiceStudio",
   "version": "1.0.0",
   "description": "Voice Studio - AI Voice Generation Tool",
-  "main": "main.js",
+  "main": ".webpack/main",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron .",
-    "dev": "electron . --watch",
-    "dev-linux": "electron . --watch --linux --no-sandbox",
-    "build": "electron-builder",
-    "postinstall": "node installers/setup.js"
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\""
   },
-  "keywords": [
-    "voice",
-    "ai",
-    "studio"
-  ],
-  "author": {
-    "name": "Euler Labs",
-    "email": "kanishka@ateulerlabs.com"
-  },
-  "license": "ISC",
+  "keywords": [],
+  "author": "Kanishka",
+  "license": "MIT",
   "devDependencies": {
-    "electron": "^34.2.0",
-    "electron-builder": "^24.9.1",
-    "electron-reloader": "^1.2.3"
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@babel/preset-react": "^7.23.3",
+    "@electron-forge/cli": "^7.7.0",
+    "@electron-forge/maker-deb": "^7.7.0",
+    "@electron-forge/maker-rpm": "^7.7.0",
+    "@electron-forge/maker-squirrel": "^7.7.0",
+    "@electron-forge/maker-zip": "^7.7.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.7.0",
+    "@electron-forge/plugin-fuses": "^7.7.0",
+    "@electron-forge/plugin-webpack": "^7.7.0",
+    "@electron/fuses": "^1.8.0",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+    "babel-loader": "^9.1.3",
+    "css-loader": "^6.11.0",
+    "electron": "34.2.0",
+    "node-loader": "^2.1.0",
+    "style-loader": "^3.3.4"
   },
   "dependencies": {
     "dockerode": "^4.0.4",
-    "systeminformation": "^5.25.11"
-  },
-  "build": {
-    "appId": "com.voicestudio.app",
-    "productName": "VoiceStudio",
-    "linux": {
-      "target": [
-        "deb"
-      ],
-      "category": "AudioVideo",
-      "desktop": {
-        "StartupWMClass": "voice-studio"
-      },
-      "maintainer": "Euler Labs Team <kanishka@ateulerlabs.com>",
-      "executableName": "voice-studio",
-      "artifactName": "${productName}-${version}.${ext}"
-    },
-    "win": {
-      "target": [
-        "nsis"
-      ],
-      "artifactName": "${productName}-Setup-${version}.${ext}",
-      "icon": "build/icon.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
-    },
-    "deb": {
-      "afterInstall": "installers/linux-post-install.sh"
-    },
-    "extraFiles": [
-      {
-        "from": "installers/50-docker.rules",
-        "to": "resources/50-docker.rules",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
-    "files": [
-      "**/*",
-      "installers/50-docker.rules"
-    ],
-    "asarUnpack": [
-      "installers/50-docker.rules",
-      "runtimes/scripts/*"
-    ]
+    "electron-squirrel-startup": "^1.0.1",
+    "node-fetch": "^2.7.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.5.0",
+    "systeminformation": "^5.25.11",
+    "ws": "^8.18.1"
   }
 }

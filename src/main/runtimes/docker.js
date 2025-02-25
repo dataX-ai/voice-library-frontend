@@ -6,6 +6,9 @@ const CONFIG = require('../config.js');
 const { getDataPath } = require('../utils/paths');
 
 class DockerManager {
+    // Class-level mutex flag
+    static isCheckingContainer = false;
+    static checkContainerPromise = null;
 
     static runPrivilegedCommand(command, callback) {
         if (process.platform === 'linux') {
@@ -24,32 +27,43 @@ class DockerManager {
     }
 
     static async getScriptPath(scriptName) {
-        const scriptsPath = path.join(__dirname, 'scripts');
+        let scriptsPath;
+        console.log('Current directory:', __dirname);
+        console.log('Process working directory:', process.cwd());
+        console.log('Is development?', process.env.NODE_ENV === 'development');
+        
+        if (process.env.NODE_ENV === 'development') {
+            // In development, use the scripts from the source directory
+            // Go up from .webpack/main to the project root, then to src/main/runtimes/scripts
+            scriptsPath = path.join(process.cwd(), 'src', 'main', 'runtimes', 'scripts');
+            console.log('Development scripts path:', scriptsPath);
+        } else {
+            // In production, use the scripts from the resources directory
+            scriptsPath = path.join(process.resourcesPath, 'scripts');
+            console.log('Production scripts path:', scriptsPath);
+        }
+        
         const scriptPath = path.join(scriptsPath, scriptName);
+        console.log('Full script path:', scriptPath);
         
         try {
-            // Only handle ASAR unpacking and permissions for Linux
-            if (process.platform === 'linux' || process.platform === 'win32') {
-                // Check if we're running from an ASAR archive
-                const isAsar = scriptPath.includes('app.asar');
-                const finalPath = isAsar ? scriptPath.replace('app.asar', 'app.asar.unpacked') : scriptPath;
-                
+            // Verify the script exists
+            await fs.access(scriptPath);
+            console.log('Script exists at:', scriptPath);
+            
+            // Set executable permissions for Unix systems
+            if (process.platform !== 'win32') {
                 try {
-                    await fs.chmod(finalPath, '755');
+                    await fs.chmod(scriptPath, '755');
                 } catch (error) {
-                    console.warn(`Warning: Could not set executable permissions on ${finalPath}`, error);
-                    // Continue execution as the file might already be executable
+                    console.warn(`Warning: Could not set executable permissions on ${scriptPath}`, error);
                 }
-                
-                // Verify the script exists
-                await fs.access(finalPath);
-                return finalPath;
             }
             
-            // For Windows and macOS, just return the direct path
             return scriptPath;
         } catch (error) {
             console.error(`Failed to prepare script ${scriptName}:`, error);
+            console.error('Attempted script path was:', scriptPath);
             throw new Error(`Script not found: ${scriptName}. Make sure all required files are included in your project.`);
         }
     }
@@ -203,6 +217,26 @@ class DockerManager {
     }
 
     static async checkModelContainer() {
+        // If already running, return the existing promise
+        if (this.isCheckingContainer) {
+            console.log('Container check already in progress, waiting for existing operation...');
+            return this.checkContainerPromise;
+        }
+
+        try {
+            // Set mutex flag and create new promise
+            this.isCheckingContainer = true;
+            this.checkContainerPromise = this._checkModelContainerImpl();
+            return await this.checkContainerPromise;
+        } finally {
+            // Always release the mutex when done
+            this.isCheckingContainer = false;
+            this.checkContainerPromise = null;
+        }
+    }
+
+    // Implementation moved to private method
+    static async _checkModelContainerImpl() {
         try {
             // Validate Docker image configuration first
             if (!CONFIG.DOCKER_IMAGE) {
@@ -214,9 +248,13 @@ class DockerManager {
             const containerName = `voice-studio-models-${imageHash}`;
             console.log('Checking for existing containers...');
             
+            // List ALL containers including stopped ones
             const containers = await docker.listContainers({
                 all: true,
-                filters: { name: [containerName] }
+                filters: { 
+                    name: [containerName],
+                    ancestor: [CONFIG.DOCKER_IMAGE]
+                }
             });
 
             if (containers.length > 0) {
@@ -224,15 +262,66 @@ class DockerManager {
                 console.log('Found existing container:', container.Id);
                 console.log('Container state:', container.State);
                 
-                if (container.State !== 'running') {
-                    console.log('Container exists but not running, starting it...');
-                    const containerInstance = docker.getContainer(container.Id);
-                    await containerInstance.start();
-                    console.log('Container started successfully');
+                const containerInstance = docker.getContainer(container.Id);
+                
+                // Get detailed container info
+                const containerInfo = await containerInstance.inspect();
+                const ports = containerInfo.NetworkSettings.Ports['8000/tcp'] || [];
+                const portMapping = ports[0]?.HostPort;
+
+                if (portMapping) {
+                    console.log('Found existing port mapping:', portMapping);
+                    
+                    // Check if the existing port is available or if this container is already using it
+                    const portInUseByOther = await this.isPortInUseByOtherContainer(portMapping, container.Id);
+                    
+                    if (!portInUseByOther) {
+                        CONFIG.RUNTIME_PORT = portMapping;
+                        
+                        // If container exists but not running, start it
+                        if (container.State !== 'running') {
+                            console.log('Container exists but not running, starting it...');
+                            try {
+                                await containerInstance.start();
+                                console.log('Container started successfully');
+                                
+                                // Add a delay to allow container to fully start
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                                
+                                // Verify container is actually running
+                                const updatedInfo = await containerInstance.inspect();
+                                if (!updatedInfo.State.Running) {
+                                    throw new Error('Container failed to start properly');
+                                }
+                            } catch (startError) {
+                                console.error('Failed to start container:', startError);
+                                console.log('Removing container and creating new one...');
+                                await containerInstance.remove({ force: true });
+                                return await this.pullAndStartContainer();
+                            }
+                        } else {
+                            console.log('Container is already running');
+                        }
+                        return true;
+                    } else {
+                        console.log('Port is in use by another container, finding new port...');
+                        const newPort = await this.findAvailablePort();
+                        CONFIG.RUNTIME_PORT = newPort;
+                        
+                        // Stop and remove the existing container
+                        console.log('Stopping and removing existing container...');
+                        await containerInstance.stop();
+                        await containerInstance.remove();
+                        
+                        // Create new container with the new port
+                        return await this.pullAndStartContainer();
+                    }
                 } else {
-                    console.log('Container is already running');
+                    // If container exists but has no port mapping, remove and recreate
+                    console.log('Existing container has no port mapping, recreating...');
+                    await containerInstance.remove({ force: true });
+                    return await this.pullAndStartContainer();
                 }
-                return true;
             }
 
             console.log('No existing container found, creating new one...');
@@ -259,6 +348,30 @@ class DockerManager {
             console.error('Error getting image hash:', error);
             throw new Error(`Failed to generate image hash: ${error.message}`);
         }
+    }
+
+    static async isPortAvailable(port) {
+        const docker = new Docker();
+        const containers = await docker.listContainers();
+        // Check if any container is using this port
+        for (const container of containers) {
+            const ports = container.Ports || [];
+            if (ports.some(p => p.PublicPort === parseInt(port))) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    static async findAvailablePort() {
+        // Try ports from 3100 to 3110
+        for (let port = 3100; port <= 3110; port++) {
+            if (await this.isPortAvailable(port.toString())) {
+                return port.toString();
+            }
+        }
+        throw new Error('No available ports found in range 3100-3110');
     }
 
     static async pullAndStartContainer() {
@@ -309,6 +422,15 @@ class DockerManager {
             console.log('Using data directory:', outputPath);
             await fs.mkdir(outputPath, { recursive: true });
 
+            // Find an available port
+
+            let port = CONFIG.RUNTIME_PORT;
+            if (port === null || ! (await this.isPortAvailable(port))){
+                port = await this.findAvailablePort();
+                CONFIG.RUNTIME_PORT = port;
+            }
+             // This will persist through the setter
+            
             // Create and start the container
             console.log('Creating container...');
             const container = await docker.createContainer({
@@ -319,7 +441,7 @@ class DockerManager {
                 },
                 HostConfig: {
                     PortBindings: {
-                        '8000/tcp': [{ HostPort: CONFIG.RUNTIME_PORT }]
+                        '8000/tcp': [{ HostPort: port }]
                     },
                     Binds: [
                         `${outputPath}:/app/output`
@@ -336,6 +458,24 @@ class DockerManager {
             console.error('Detailed error in pullAndStartContainer:', error);
             throw new Error(`Failed to pull/start container: ${error.message}`);
         }
+    }
+
+    // New helper method to check if a port is in use by containers other than the specified one
+    static async isPortInUseByOtherContainer(port, excludeContainerId) {
+        const docker = new Docker();
+        const containers = await docker.listContainers();
+        
+        // Check if any OTHER container is using this port
+        for (const container of containers) {
+            if (container.Id !== excludeContainerId) {
+                const ports = container.Ports || [];
+                if (ports.some(p => p.PublicPort === parseInt(port))) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
     }
 }
 
