@@ -5,11 +5,14 @@
   "description": "Voice Studio - AI Voice Generation Tool",
   "main": ".webpack/main",
   "scripts": {
-    "start": "electron-forge start",
+    "start": "node src/main/installers/setup.js && electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
+    "lint": "echo \"No linting configured\"",
+    "setup": "node src/main/installers/setup.js",
+    "prebuild": "npm run setup",
+    "build": "electron-forge make"
   },
   "keywords": [],
   "author": "Kanishka",

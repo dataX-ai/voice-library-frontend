@@ -211,7 +211,7 @@ function createWindow() {
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    mainWindow.loadFile(path.join(__dirname, '../renderer/main_window/index.html'));
   }
 
   return mainWindow;

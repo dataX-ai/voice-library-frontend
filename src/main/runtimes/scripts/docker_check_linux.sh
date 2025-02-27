@@ -28,19 +28,23 @@ if [ -z "$DOCKER_PATH" ]; then
     exit 0
 fi
 
-
+# Check Docker daemon status
 if ! docker info &> /dev/null; then
     # Try to start Docker daemon (without pkexec)
     if systemctl start docker &> /dev/null; then
         sleep 2
         if docker info &> /dev/null; then
             echo "RUNNING"
+            exit 0
         else
             echo "NOT RUNNING"
+            exit 0
         fi
     else
         echo "NOT RUNNING"
+        exit 0
     fi
 else
     echo "RUNNING"
+    exit 0
 fi

@@ -129,7 +129,7 @@ install_docker_desktop() {
 
     echo "Step 5.1: Activating group changes..."
     # Attempt to activate the new group membership
-    newgrp docker <<EONG
+    newgrp docker << EONG
     # Verify docker works without sudo
     echo "Step 5.2: Verifying Docker permissions..."
     if docker info &> /dev/null; then
@@ -137,7 +137,7 @@ install_docker_desktop() {
     else
         echo "Warning: Docker still requires sudo. You may need to log out and log back in."
     fi
-    EONG
+EONG
 
     echo "Step 6: Starting Docker service..."
     run_privileged systemctl enable docker
@@ -186,58 +186,63 @@ start_and_verify_docker() {
 check_docker_status() {
     echo "Checking Docker installation status..."
     
-    # Check if Docker is installed
-    if docker --version &> /dev/null; then
-        echo "Docker is already installed"
-        VERSION=$(docker --version | cut -d ' ' -f 3 | tr -d ',')
-        echo "Docker version: $VERSION"
+    # More strict Docker installation check
+    if command -v docker &> /dev/null; then
+        # Try to get Docker version and validate it's not empty
+        DOCKER_VERSION=$(docker --version 2>/dev/null)
+        VERSION=$(echo "$DOCKER_VERSION" | cut -d ' ' -f 3 | tr -d ',')
         
-        # Check if Docker daemon is running
-        if run_privileged docker info &> /dev/null; then
-            echo "Docker daemon is running"
+        if [ -n "$VERSION" ] && [ "$VERSION" != "" ]; then
+            echo "Docker is already installed"
+            echo "Docker version: $VERSION"
             
-            # Check if docker group exists
-            if getent group docker &> /dev/null; then
-                echo "Docker group exists, adding user to group..."
-                run_privileged usermod -aG docker $USER
+            # Check if Docker daemon is running with strict validation
+            DOCKER_INFO=$(run_privileged docker info 2>/dev/null)
+            if [ $? -eq 0 ] && [ -n "$DOCKER_INFO" ]; then
+                echo "Docker daemon is running"
                 
-                # Try docker without privileges
-                echo "Testing Docker without privileges..."
-                if docker info &> /dev/null; then
-                    echo "Docker is working without sudo"
-                    return 0
-                else
+                # Check if docker group exists
+                if getent group docker &> /dev/null; then
+                    echo "Docker group exists, adding user to group..."
+                    run_privileged usermod -aG docker $USER
+                    
+                    # Try docker without privileges
+                    DOCKER_INFO_UNPRIVILEGED=$(docker info 2>/dev/null)
+                    if [ $? -eq 0 ] && [ -n "$DOCKER_INFO_UNPRIVILEGED" ]; then
+                        echo "Docker is working without sudo"
+                        return 0
+                    fi
                     echo "Docker requires sudo, attempting to fix permissions..."
                 fi
-            fi
-            
-            # If we get here, either group doesn't exist or permissions aren't working
-            echo "Setting up Docker group and permissions..."
-            run_privileged groupadd -f docker
-            run_privileged usermod -aG docker $USER
-            run_privileged chmod 666 /var/run/docker.sock
-            
-            # Activate new group membership
-            echo "Activating group changes..."
-            newgrp docker <<EONG
-            if docker info &> /dev/null; then
-                echo "Successfully configured Docker to run without sudo"
-            else
-                echo "Warning: Docker still requires sudo. You may need to log out and log back in."
-            fi
+                
+                # If we get here, either group doesn't exist or permissions aren't working
+                echo "Setting up Docker group and permissions..."
+                run_privileged groupadd -f docker
+                run_privileged usermod -aG docker $USER
+                run_privileged chmod 666 /var/run/docker.sock
+                
+                # Activate new group membership
+                echo "Activating group changes..."
+                newgrp docker << EONG
+                if docker info &> /dev/null; then
+                    echo "Successfully configured Docker to run without sudo"
+                else
+                    echo "Warning: Docker still requires sudo. You may need to log out and log back in."
+                fi
 EONG
-            return 0
-        else
+                return 0
+            fi
+            
             echo "Docker is installed but daemon is not running"
             echo "Starting Docker daemon..."
             run_privileged systemctl start docker
             sleep 2
             return 0
         fi
-    else
-        echo "Docker is not installed"
-        return 1
     fi
+    
+    echo "Docker is not installed"
+    return 1
 }
 
 # Main installation process
@@ -261,21 +266,30 @@ fi
 # Final verification
 echo "Step 9: Performing final verification..."
 if command -v docker &> /dev/null; then
-    echo "Docker Desktop installed successfully!"
-    VERSION=$(docker --version | cut -d ' ' -f 3 | tr -d ',')
+    DOCKER_VERSION=$(docker --version 2>/dev/null)
+    VERSION=$(echo "$DOCKER_VERSION" | cut -d ' ' -f 3 | tr -d ',')
     
-    # Try without sudo first
-    if docker info &> /dev/null; then
-        echo "Docker is running and accessible without sudo"
-        echo "{\"success\": true, \"version\": \"$VERSION\", \"isRunning\": true, \"requiresSudo\": false}"
-    else
-        # Try with sudo as fallback
-        if pkexec docker info &> /dev/null; then
-            echo "Docker is running but requires sudo"
-            echo "{\"success\": true, \"version\": \"$VERSION\", \"isRunning\": true, \"requiresSudo\": true}"
+    if [ -n "$VERSION" ] && [ "$VERSION" != "" ]; then
+        echo "Docker Desktop installed successfully!"
+        
+        # Try without sudo first
+        DOCKER_INFO=$(docker info 2>/dev/null)
+        if [ $? -eq 0 ] && [ -n "$DOCKER_INFO" ]; then
+            echo "Docker is running and accessible without sudo"
+            echo "{\"success\": true, \"version\": \"$VERSION\", \"isRunning\": true, \"requiresSudo\": false}"
         else
-            echo "{\"success\": true, \"version\": \"$VERSION\", \"isRunning\": false}"
+            # Try with sudo as fallback
+            PRIVILEGED_DOCKER_INFO=$(run_privileged docker info 2>/dev/null)
+            if [ $? -eq 0 ] && [ -n "$PRIVILEGED_DOCKER_INFO" ]; then
+                echo "Docker is running but requires sudo"
+                echo "{\"success\": true, \"version\": \"$VERSION\", \"isRunning\": true, \"requiresSudo\": true}"
+            else
+                echo "{\"success\": true, \"version\": \"$VERSION\", \"isRunning\": false}"
+            fi
         fi
+    else
+        echo "{\"success\": false, \"error\": \"Invalid Docker installation\"}"
+        exit 1
     fi
 else
     echo "{\"success\": false, \"error\": \"Installation failed\"}"
