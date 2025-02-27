@@ -1,9 +1,15 @@
+const path = require('path');
+
 module.exports = {
   module: {
     rules: require('./webpack.rules'),
   },
   resolve: {
-    extensions: ['.js']
+    extensions: ['.js'],
+    alias: {
+      '@src': path.resolve(__dirname, 'src'),
+      '@preload': path.resolve(__dirname, 'src/preload')
+    }
   },
   // Mark Node.js built-in modules as external
   externals: {

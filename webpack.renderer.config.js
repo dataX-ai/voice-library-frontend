@@ -34,7 +34,14 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.css']
+    extensions: ['.js', '.jsx', '.css'],
+    alias: {
+      // Add aliases if needed to help with path resolution
+      '@src': path.resolve(__dirname, 'src'),
+      '@renderer': path.resolve(__dirname, 'src/renderer'),
+      '@preload': path.resolve(__dirname, 'src/preload'),
+      '@main': path.resolve(__dirname, 'src/main')
+    }
   },
   externals: {
     'electron': 'commonjs2 electron'

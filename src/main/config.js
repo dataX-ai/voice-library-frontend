@@ -1,4 +1,8 @@
 const configManager = require('./utils/config-manager');
+const path = require('path');
+const fs = require('fs');
+// Add dotenv configuration
+require('dotenv').config();
 
 const CONFIG = {
     // Runtime configuration
@@ -14,7 +18,8 @@ const CONFIG = {
     get LOCAL_ENDPOINT() {
         return `http://127.0.0.1:${this.RUNTIME_PORT}`;
     },
-    BACKEND_ENDPOINT: 'http://127.0.0.1:8000',
+    // Load from build config first, then env, then fallback
+    BACKEND_ENDPOINT: process.env.BACKEND_ENDPOINT || 'http://127.0.0.1:8000',
     get GENERATE_AUDIO_ENDPOINT() {
         return `${this.LOCAL_ENDPOINT}/tts`;
     },

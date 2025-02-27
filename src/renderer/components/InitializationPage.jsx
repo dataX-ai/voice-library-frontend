@@ -1,6 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import styles from './InitializationPage.module.css';
 
+// Import the same keys used in TextToSpeech
+const STORAGE_KEYS = {
+  TEXT: 'tts-text',
+  SELECTED_MODEL: 'tts-selected-model',
+  SHOW_AUDIO_CONTROLS: 'tts-show-audio-controls',
+  AUDIO_PATH: 'tts-audio-path',
+  IS_GENERATING: 'tts-is-generating',
+  GENERATION_START_TIME: 'tts-generation-start-time'
+};
+
+// Clear all TTS-related localStorage data
+const clearStoredData = () => {
+  Object.values(STORAGE_KEYS).forEach(key => {
+    localStorage.removeItem(key);
+  });
+};
+
 const InitializationPage = ({ onInitializationComplete }) => {
     const [status, setStatus] = useState('checking');
     const [error, setError] = useState(null);
@@ -8,6 +25,9 @@ const InitializationPage = ({ onInitializationComplete }) => {
     const [fadeOut, setFadeOut] = useState(false);
 
     useEffect(() => {
+        // Clear all stored TTS data on app initialization
+        clearStoredData();
+        
         const checkDocker = async () => {
             try {
                 // Check if Docker is installed and running

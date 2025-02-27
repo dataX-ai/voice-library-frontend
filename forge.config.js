@@ -2,9 +2,10 @@ const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
-packagerConfig: {
-asar: true,
-executableName: 'voice-studio-app',
+  packagerConfig: {
+    name: 'VoiceStudio',
+    executableName: 'VoiceStudio',
+    asar: true,
     asarUnpack: [
       "src/main/runtimes/scripts/*",
       "src/main/installers/*"
@@ -25,9 +26,8 @@ executableName: 'voice-studio-app',
     {
       name: '@electron-forge/maker-squirrel',
       config: {
-        name: 'voice_studio_app',
+        name: 'VoiceStudio',
         setupExe: 'VoiceStudio-Setup.exe',
-        exe: 'VoiceStudio.exe'
       }
     },
     {
@@ -65,16 +65,15 @@ executableName: 'voice-studio-app',
               name: 'main_window',
               preload: {
                 js: './src/preload/preload.js',
-                config: './webpack.renderer.config.js'
               },
-              outputPath: 'main_window'
-            }
-          ]
+            },
+          ],
         },
-        devContentSecurityPolicy: "connect-src 'self' * 'unsafe-eval'",
-        port: 5173,
-        loggerPort: 9000
-      }
-    }
+      },
+    },
+    {
+      name: '@electron-forge/plugin-auto-unpack-natives',
+      config: {},
+    },
   ]
 };

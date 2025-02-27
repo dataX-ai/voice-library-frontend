@@ -1,3 +1,5 @@
+const path = require('path');
+const webpack = require('webpack');
 module.exports = {
   /**
    * This is the main entry point for your application, it's the first file
@@ -26,8 +28,17 @@ module.exports = {
       }
     ]
   },
+  plugins: [
+    new webpack.EnvironmentPlugin({
+      BACKEND_ENDPOINT: process.env.BACKEND_ENDPOINT || 'http://127.0.0.1:8000',
+    }),
+  ],
   resolve: {
-    extensions: ['.js', '.jsx', '.bat', '.sh', '.node']
+    extensions: ['.js', '.jsx', '.bat', '.sh', '.node'],
+    alias: {
+      '@src': path.resolve(__dirname, 'src'),
+      '@main': path.resolve(__dirname, 'src/main')
+    }
   },
   externals: {
     'electron': 'commonjs2 electron'

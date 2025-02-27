@@ -5,9 +5,9 @@
   "description": "Voice Studio - AI Voice Generation Tool",
   "main": ".webpack/main",
   "scripts": {
-    "start": "node src/main/installers/setup.js && electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
+    "start": "node src/main/installers/setup.js && env-cmd -f .env electron-forge start",
+    "package": "env-cmd -f .env electron-forge package",
+    "make": "env-cmd -f .env electron-forge make",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
     "setup": "node src/main/installers/setup.js"
@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "dockerode": "^4.0.4",
+    "dotenv": "^16.4.7",
     "electron-squirrel-startup": "^1.0.1",
     "node-fetch": "^2.7.0",
     "react": "^18.2.0",

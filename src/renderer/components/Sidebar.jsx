@@ -17,37 +17,45 @@ import styles from './Sidebar.module.css';
 const Sidebar = ({ onNavigate }) => {
     const [activeDropdown, setActiveDropdown] = useState(null);
 
+    // Define colors for each sidebar item
+    const iconColors = {
+        voice: '#FF5757',      // Red for voice features
+        folder: '#4CAF50',     // Green for folders
+        search: '#2196F3',     // Blue for search
+        hardware: '#FF9800'    // Orange for hardware
+    };
+
     const sidebarItems = [
         {
             id: 'voice',
-            icon: <FaMicrophone />,
+            icon: <FaMicrophone style={{ color: iconColors.voice }} />,
             options: [
-                { id: 'text-to-speech', icon: <FaCommentDots />, label: 'Text to Speech' },
-                { id: 'text-to-sfx', icon: <FaVolumeUp />, label: 'Text to SFX' },
-                { id: 'voice-changer', icon: <FaExchangeAlt />, label: 'Voice Changer' },
-                { id: 'voice-cloning', icon: <FaUserFriends />, label: 'Voice Cloning' }
+                { id: 'text-to-speech', icon: <FaCommentDots style={{ color: iconColors.voice }} />, label: 'Text to Speech' },
+                { id: 'text-to-sfx', icon: <FaVolumeUp style={{ color: iconColors.voice }} />, label: 'Text to SFX' },
+                { id: 'voice-changer', icon: <FaExchangeAlt style={{ color: iconColors.voice }} />, label: 'Voice Changer' },
+                { id: 'voice-cloning', icon: <FaUserFriends style={{ color: iconColors.voice }} />, label: 'Voice Cloning' }
             ]
         },
         {
             id: 'folder',
-            icon: <FaFolder />,
+            icon: <FaFolder style={{ color: iconColors.folder }} />,
             options: [
-                { id: 'my-models', icon: <FaFolderOpen />, label: 'My Models' }
+                { id: 'my-models', icon: <FaFolderOpen style={{ color: iconColors.folder }} />, label: 'My Models' }
             ]
         },
         {
             id: 'search',
-            icon: <FaSearch />,
+            icon: <FaSearch style={{ color: iconColors.search }} />,
             options: [
-                { id: 'search-models', icon: <FaSearch />, label: 'Search Models' }
+                { id: 'search-models', icon: <FaSearch style={{ color: iconColors.search }} />, label: 'Search Models' }
             ]
         },
         {
             id: 'hardware',
-            icon: <FaMicrochip />,
+            icon: <FaMicrochip style={{ color: iconColors.hardware }} />,
             options: [
-                { id: 'system-info', icon: <FaDesktop />, label: 'System Info' },
-                { id: 'runtimes', icon: <IoSettings />, label: 'Runtimes' }
+                { id: 'system-info', icon: <FaDesktop style={{ color: iconColors.hardware }} />, label: 'System Info' },
+                { id: 'runtimes', icon: <IoSettings style={{ color: iconColors.hardware }} />, label: 'Runtimes' }
             ]
         }
     ];
