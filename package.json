@@ -10,9 +10,7 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
-    "setup": "node src/main/installers/setup.js",
-    "prebuild": "npm run setup",
-    "build": "electron-forge make"
+    "setup": "node src/main/installers/setup.js"
   },
   "keywords": [],
   "author": "Kanishka",
