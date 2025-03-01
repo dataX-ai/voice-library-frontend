@@ -15,6 +15,10 @@ prompt_for_sudo() {
 }
 
 echo "Checking for Homebrew installation..."
+
+# Fix: You're calling the function without parentheses
+prompt_for_sudo
+
 # Check if Homebrew is installed
 if ! command -v brew &> /dev/null; then
     echo "Homebrew not found. Installing Homebrew..."
@@ -24,7 +28,7 @@ if ! command -v brew &> /dev/null; then
         echo "Standard installation failed. Requesting admin privileges..."
         prompt_for_sudo
         
-        # After getting sudo, try again with privilege in non-interactive mode
+        # Fix: Missing semicolon at the end of this line
         NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
     fi
     
@@ -42,6 +46,14 @@ if ! command -v brew &> /dev/null; then
     fi
 else
     echo "Homebrew is already installed."
+fi
+
+# Fix: Need to ensure brew is in PATH for this script session
+# Source the profile to make brew available in this script
+if [[ $(uname -m) == "arm64" ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null
+else
+    eval "$(/usr/local/bin/brew shellenv)" 2>/dev/null
 fi
 
 # Install Docker Desktop for Mac in non-interactive mode

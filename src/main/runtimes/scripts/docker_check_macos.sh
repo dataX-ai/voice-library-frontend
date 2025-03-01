@@ -6,13 +6,21 @@ if [ -f "/etc/profile" ]; then
     source /etc/profile
 fi
 
-# Source user's profile and zshrc (macOS default shell is zsh)
-if [ -f "$HOME/.zprofile" ]; then
-    source "$HOME/.zprofile"
-fi
+CURRENT_SHELL=$(basename "$SHELL")
 
-if [ -f "$HOME/.zshrc" ]; then
-    source "$HOME/.zshrc"
+if [ "$CURRENT_SHELL" = "zsh" ]; then
+    # Source zsh profiles without executing zsh-specific code
+    if [ -f "$HOME/.zprofile" ]; then
+        # Use grep to filter out zsh-specific syntax
+        grep -v "^\s*\(\|\)\|setopt\|typeset\|autoload\|zstyle\|compdef" "$HOME/.zprofile" | source /dev/stdin
+    fi
+else
+    # Source bash profiles
+    if [ -f "$HOME/.bash_profile" ]; then
+        source "$HOME/.bash_profile"
+    elif [ -f "$HOME/.profile" ]; then
+        source "$HOME/.profile"
+    fi
 fi
 
 # Debug: Try to find docker

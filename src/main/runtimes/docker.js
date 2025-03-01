@@ -18,7 +18,7 @@ class DockerManager {
             });
         } else if (process.platform === 'darwin') {
             // macOS: Use osascript elevation
-            exec(`osascript -e 'do shell script "${command}" with administrator privileges'`, 
+            exec(`osascript -e "do shell script \\"sh ${command}\\" with administrator privileges"`, 
                 callback);
         } else if (process.platform === 'win32') {
             // Windows: Execute normally as the script handles elevation internally
@@ -167,7 +167,7 @@ class DockerManager {
             const scriptPath = await this.getInstallScript();
 
             return new Promise((resolve, reject) => {
-                const command = process.platform === 'win32'
+                const command = process.platform === 'win32' || process.platform === 'darwin' 
                     ? scriptPath
                     : `sh "${scriptPath}"`;
 
