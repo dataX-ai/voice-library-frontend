@@ -61,5 +61,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
         } else {
             console.warn(`Invalid channel '${channel}' for IPC listener removal`);
         }
+    },
+
+    // Add sudo password methods
+    handleSudoPassword: (callback) => {
+        ipcRenderer.on('request-sudo-password', () => {
+            callback();
+        });
+    },
+    
+    submitSudoPassword: (password) => {
+        ipcRenderer.send('submit-sudo-password', password);
     }
 });

@@ -1,35 +1,28 @@
 #!/bin/bash
 
-# Function to prompt for password with a GUI dialog if needed
-prompt_for_sudo() {
-    # AppleScript to show a more user-friendly password prompt
-    osascript -e 'tell application "System Events" to display dialog "The installation requires admin privileges to continue." buttons {"OK"} default button "OK" with title "Admin Privileges Required"'
-    
-    # Get admin privileges
-    if ! sudo -n true 2>/dev/null; then
-        echo "Please enter your password for admin privileges:"
-        sudo -v
-        # Keep-alive: update existing sudo time stamp until script has finished
-        while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-    fi
-}
+# Flag to indicate if we're running with sudo privileges
+WITH_SUDO=false
+
+# Check for the --with-sudo flag
+if [[ "$1" == "--with-sudo" ]]; then
+    WITH_SUDO=true
+fi
 
 echo "Checking for Homebrew installation..."
-
-# Fix: You're calling the function without parentheses
-prompt_for_sudo
-
 # Check if Homebrew is installed
 if ! command -v brew &> /dev/null; then
     echo "Homebrew not found. Installing Homebrew..."
     
-    # First try the regular installation (non-sudo) in non-interactive mode
-    if ! NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null; then
-        echo "Standard installation failed. Requesting admin privileges..."
-        prompt_for_sudo
-        
-        # Fix: Missing semicolon at the end of this line
+    if $WITH_SUDO; then
+        # We're already running with sudo privileges from AppleScript
+        # Just install homebrew directly (which doesn't want sudo)
         NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
+    else
+        # First try the regular installation (non-sudo) in non-interactive mode
+        if ! NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null; then
+            echo "Standard installation failed."
+            exit 1
+        fi
     fi
     
     # Add Homebrew to PATH if needed
