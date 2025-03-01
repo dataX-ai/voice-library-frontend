@@ -1,4 +1,4 @@
-# Local TTS App
+# VoiceStudio
 
 A desktop application that runs Text-To-Speech (TTS) models locally on your device, without requiring an internet connection or sending your data to external servers.
 
@@ -14,10 +14,7 @@ This repository contains only the UI part of the application. To update the cont
 
 ### Prerequisites
 
-- Run the VoiceStudio Backend repository at localhost:8000:
-  ```
-  https://github.com/psarathi012/voice-library-backend
-  ```
+- Run the [VoiceStudio Backend](https://github.com/dataX-ai/voice-studio-models-library) repository at localhost:8000:
 
 ### Installation and Running
 
@@ -39,7 +36,7 @@ This repository contains only the UI part of the application. To update the cont
 ## Supported Models
 
 | Model | Windows | Ubuntu/Debian | MacOS | Link |
-|-------|---------|---------------|-------|------|
+|:-----:|:-------:|:-------------:|:-----:|:----:|
 | hexgrad/Kokoro-82M | ✅ | ✅ | ❌ | [Hugging Face](https://huggingface.co/hexgrad/Kokoro-82M) |
 
 ## Installation
