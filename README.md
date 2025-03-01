@@ -10,6 +10,12 @@ This application allows you to run various Text-To-Speech models directly on you
 
 This repository contains only the UI part of the application. To update the container running the actual models, please refer to the [VoiceStudio Models Library](https://github.com/dataX-ai/voice-studio-models-library).
 
+## Installation
+
+Check out our release page for the latest version of the application:
+
+[VoiceStudio Release Page](https://github.com/psarathi012/voice-library-frontend/releases)
+
 ## Local Setup
 
 ### Prerequisites
@@ -39,21 +45,9 @@ This repository contains only the UI part of the application. To update the cont
 |:-----:|:-------:|:-------------:|:-----:|:----:|
 | hexgrad/Kokoro-82M | ✅ | ✅ | ❌ | [Hugging Face](https://huggingface.co/hexgrad/Kokoro-82M) |
 
-## Installation
-
-*Installation instructions will go here*
-
-## Usage
-
-*Usage instructions will go here*
-
-## Development
-
-*Development setup instructions will go here*
-
 ## License
 
-*License information will go here*
+This project is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
 ## Acknowledgements
 
