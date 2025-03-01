@@ -2,6 +2,12 @@
 
 A desktop application that runs Text-To-Speech (TTS) models locally on your device, without requiring an internet connection or sending your data to external servers.
 
+## Installation
+
+Check out our release page for the latest version of the application:
+
+[VoiceStudio Release Page](https://github.com/psarathi012/voice-library-frontend/releases)
+
 ## Description
 
 This application allows you to run various Text-To-Speech models directly on your computer. It provides a simple interface to convert text to natural-sounding speech using state-of-the-art AI models while maintaining your privacy by processing everything locally.
@@ -10,11 +16,7 @@ This application allows you to run various Text-To-Speech models directly on you
 
 This repository contains only the UI part of the application. To update the container running the actual models, please refer to the [VoiceStudio Models Library](https://github.com/dataX-ai/voice-studio-models-library).
 
-## Installation
 
-Check out our release page for the latest version of the application:
-
-[VoiceStudio Release Page](https://github.com/psarathi012/voice-library-frontend/releases)
 
 ## Local Setup
 
