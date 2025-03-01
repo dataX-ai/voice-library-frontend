@@ -10,22 +10,15 @@ CURRENT_SHELL=$(basename "$SHELL")
 
 if [ "$CURRENT_SHELL" = "zsh" ]; then
     # Source zsh profiles without executing zsh-specific code
-    if [ -f "$HOME/.zprofile" ]; then
-        # Use grep to filter out zsh-specific syntax
-        grep -v "^\s*\(\|\)\|setopt\|typeset\|autoload\|zstyle\|compdef" "$HOME/.zprofile" | source /dev/stdin
-    fi
+    source "$HOME/.zshrc"
 else
     # Source bash profiles
-    if [ -f "$HOME/.bash_profile" ]; then
-        source "$HOME/.bash_profile"
-    elif [ -f "$HOME/.profile" ]; then
-        source "$HOME/.profile"
-    fi
+   source "$HOME/.bashrc"
 fi
 
 # Debug: Try to find docker
 DOCKER_PATH=$(command -v docker)
-
+echo "DOCKER_PATH $DOCKER_PATH"
 # Check if docker command is available
 if [ -z "$DOCKER_PATH" ]; then
     echo "NOT INSTALLED"

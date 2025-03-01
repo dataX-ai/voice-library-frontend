@@ -18,58 +18,8 @@ class DockerManager {
             });
         } else if (process.platform === 'darwin') {
             // Make the script executable first
-            exec(`chmod +x "${command}"`, () => {
-                // Run the script directly (not as root)
-                const proc = exec(`"${command}"`, (error, stdout, stderr) => {
-                    callback(error, stdout, stderr);
-                });
-                
-                let stdoutBuffer = '';
-                let passwordRequested = false;
-                
-                // Monitor stdout for password prompts
-                proc.stdout.on('data', (data) => {
-                    const output = data.toString();
-                    stdoutBuffer += output;
-                    console.log('Script output:', output);
-                    
-                    // Check for password prompts
-                    if (!passwordRequested && 
-                        (output.includes('Password:') || 
-                         output.toLowerCase().includes('password for') ||
-                         output.includes('[sudo]'))) {
-                        
-                        passwordRequested = true;
-                        
-                        // Get the main window from global
-                        const mainWindow = global.mainWindow;
-                        if (!mainWindow) {
-                            console.error('Main window not available');
-                            proc.kill();
-                            return callback(new Error('Main window not available for password prompt'), stdout, stderr);
-                        }
-                        
-                        // Request password from renderer process
-                        mainWindow.webContents.send('request-sudo-password');
-                        
-                        // Set up one-time listener for password response
-                        global.ipcMain.once('submit-sudo-password', (event, password) => {
-                            if (password) {
-                                proc.stdin.write(password + '\n');
-                                passwordRequested = false;
-                            } else {
-                                // User cancelled
-                                proc.kill();
-                                callback(new Error('Password entry cancelled'), stdoutBuffer, stderr);
-                            }
-                        });
-                    }
-                });
-                
-                // Monitor stderr
-                proc.stderr.on('data', (data) => {
-                    console.error('Script error:', data.toString());
-                });
+            exec(`osascript -e 'do shell script "\\"${command.replace(/"/g, '\\\\"')}\\"" with administrator privileges'`, (error, stdout, stderr) => {
+                callback(error, stdout, stderr);
             });
         } else if (process.platform === 'win32') {
             // Windows: Execute normally as the script handles elevation internally
