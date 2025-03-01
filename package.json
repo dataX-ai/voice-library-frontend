@@ -10,7 +10,8 @@
     "make": "env-cmd -f .env electron-forge make",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
-    "setup": "node src/main/installers/setup.js"
+    "setup": "node src/main/installers/setup.js",
+    "publish:launchpad": "node scripts/publish-launchpad.js"
   },
   "keywords": [],
   "author": "Kanishka",
@@ -33,7 +34,9 @@
     "css-loader": "^6.11.0",
     "electron": "34.2.0",
     "node-loader": "^2.1.0",
-    "style-loader": "^3.3.4"
+    "style-loader": "^3.3.4",
+    "shelljs": "^0.8.5",
+    "fs-extra": "^11.2.0"
   },
   "dependencies": {
     "dockerode": "^4.0.4",

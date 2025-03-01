@@ -1,10 +1,13 @@
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
+// Determine platform-specific settings
+const isWindows = process.platform === 'win32';
+
 module.exports = {
   packagerConfig: {
     name: 'VoiceStudio',
-    executableName: 'VoiceStudio',
+    executableName: isWindows ? 'VoiceStudio' : 'voice-studio-app', // Different naming as Linux has stricter naming requirements
     asar: true,
     asarUnpack: [
       "src/main/runtimes/scripts/*",
@@ -19,7 +22,8 @@ module.exports = {
       /^\/(?!\.webpack|src|package\.json)/,
       /\/[.](git|DS_Store)$/,
       /\/node_modules\//,
-    ]
+    ],
+    icon: './assets/icons/icon' // Electron will automatically use the right extension based on the platform
   },
   rebuildConfig: {},
   makers: [
@@ -28,6 +32,7 @@ module.exports = {
       config: {
         name: 'VoiceStudio',
         setupExe: 'VoiceStudio-Setup.exe',
+        setupIcon: './assets/icons/icon.ico'
       }
     },
     {
@@ -40,6 +45,8 @@ module.exports = {
         options: {
           maintainer: 'Euler Labs',
           homepage: 'https://voicestudio.2vid.ai',
+          name: 'voice-studio-app',
+          icon: './assets/icons/icon.png',
           scripts: {
             postinst: 'src/main/installers/linux-post-install.sh'
           }
@@ -48,7 +55,11 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-rpm',
-      config: {},
+      config: {
+        options: {
+          name: 'voice-studio-app'
+        }
+      },
     },
   ],
   plugins: [
