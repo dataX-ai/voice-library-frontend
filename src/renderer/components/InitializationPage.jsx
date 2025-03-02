@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './InitializationPage.module.css';
-import PasswordDialog from './PasswordDialog';
 
 // Import the same keys used in TextToSpeech
 const STORAGE_KEYS = {
@@ -26,9 +25,7 @@ const InitializationPage = ({ onInitializationComplete }) => {
     const [fadeOut, setFadeOut] = useState(false);
     // Add initialization flag to prevent multiple execution
     const initializationInProgress = useRef(false);
-    const [showPasswordDialog, setShowPasswordDialog] = useState(false);
 
-    // Define checkDocker outside useEffect for reusability
     const checkDocker = async () => {
         // Return early if initialization is already in progress
         if (initializationInProgress.current) {
@@ -90,36 +87,8 @@ const InitializationPage = ({ onInitializationComplete }) => {
     };
 
     useEffect(() => {
-        // Only run this effect once
         checkDocker();
-        
-        // Empty dependency array ensures this runs only once on mount
     }, []);
-
-    // Add password dialog handler
-    useEffect(() => {
-        // Set up listener for password requests
-        window.electronAPI.handleSudoPassword(() => {
-            setShowPasswordDialog(true);
-        });
-        
-        // Clean up listener
-        return () => {
-            // If you have a way to remove listeners, use it here
-        };
-    }, []);
-    
-    // Handle password submission
-    const handlePasswordSubmit = (password) => {
-        window.electronAPI.submitSudoPassword(password);
-        setShowPasswordDialog(false);
-    };
-    
-    // Handle password dialog cancellation
-    const handlePasswordCancel = () => {
-        window.electronAPI.submitSudoPassword(null); // Indicate cancellation
-        setShowPasswordDialog(false);
-    };
 
     const getStatusMessage = () => {
         switch (status) {
@@ -172,13 +141,6 @@ const InitializationPage = ({ onInitializationComplete }) => {
                     </div>
                 )}
             </div>
-            
-            {/* Add password dialog */}
-            <PasswordDialog 
-                isOpen={showPasswordDialog}
-                onSubmit={handlePasswordSubmit}
-                onCancel={handlePasswordCancel}
-            />
         </div>
     );
 };

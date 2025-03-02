@@ -12,7 +12,7 @@ const CONFIG = {
     set RUNTIME_PORT(value) {
         configManager.updateRuntimePort(value);
     },
-    DOCKER_IMAGE: 'voicestudio/model-library:v0.0.1',
+    DOCKER_IMAGE: process.env.DOCKER_IMAGE || 'voicestudio/model-library:latest',
 
     // API Endpoints
     get LOCAL_ENDPOINT() {
