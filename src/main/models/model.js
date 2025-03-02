@@ -38,6 +38,7 @@ const modelService = {
   // Fetch model details in batch
   async fetchModelDetails(modelIds) {
     try {
+      console.log(CONFIG.BACKEND_ENDPOINT);
       const response = await fetch(`${CONFIG.BACKEND_ENDPOINT}/models/batch`, {
         method: 'POST',
         headers: {
@@ -118,6 +119,7 @@ const modelService = {
   // Fetch available models
   async fetchModels() {
     try {
+      console.log(CONFIG.BACKEND_ENDPOINT);
       const response = await fetch(`${CONFIG.BACKEND_ENDPOINT}/models`, {
         method: 'POST'
       });

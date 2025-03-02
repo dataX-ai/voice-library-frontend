@@ -63,14 +63,4 @@ contextBridge.exposeInMainWorld('electronAPI', {
         }
     },
 
-    // Add sudo password methods
-    handleSudoPassword: (callback) => {
-        ipcRenderer.on('request-sudo-password', () => {
-            callback();
-        });
-    },
-    
-    submitSudoPassword: (password) => {
-        ipcRenderer.send('submit-sudo-password', password);
-    }
 });
