@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styles from './InitializationPage.module.css';
+import PasswordDialog from './PasswordDialog';
 
 // Import the same keys used in TextToSpeech
 const STORAGE_KEYS = {
@@ -23,58 +24,102 @@ const InitializationPage = ({ onInitializationComplete }) => {
     const [error, setError] = useState(null);
     const [showSuccess, setShowSuccess] = useState(false);
     const [fadeOut, setFadeOut] = useState(false);
+    // Add initialization flag to prevent multiple execution
+    const initializationInProgress = useRef(false);
+    const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+
+    // Define checkDocker outside useEffect for reusability
+    const checkDocker = async () => {
+        // Return early if initialization is already in progress
+        if (initializationInProgress.current) {
+            console.log("Initialization already in progress, skipping duplicate request");
+            return;
+        }
+        
+        // Set flag to prevent multiple executions
+        initializationInProgress.current = true;
+        
+        try {
+            // Clear all stored TTS data on app initialization
+            clearStoredData();
+            
+            // Check if Docker is installed and running
+            const dockerStatus = await window.electronAPI.checkDocker();
+            
+            if (!dockerStatus.installed) {
+                setStatus('installing');
+                // Attempt to install Docker
+                await window.electronAPI.installDocker();
+                // Recheck Docker status after installation
+                const newStatus = await window.electronAPI.checkDocker();
+                
+                if (!newStatus.installed || !newStatus.running) {
+                    throw new Error('Docker installation failed or Docker is not running');
+                }
+            } else if (!dockerStatus.running) {
+                setStatus('starting');
+                // Wait for Docker to start
+                const retryCheck = await window.electronAPI.checkDocker();
+                if (!retryCheck.running) {
+                    throw new Error('Docker is installed but not running');
+                }
+            }
+
+            // Check if model container is ready
+            setStatus('preparing');
+            await window.electronAPI.checkModelContainer();
+
+            // Show success state briefly before completing
+            setShowSuccess(true);
+            setTimeout(() => {
+                setFadeOut(true);
+                setTimeout(() => {
+                    if (onInitializationComplete) {
+                        onInitializationComplete();
+                    }
+                }, 500);
+            }, 1000);
+
+        } catch (error) {
+            console.error('Initialization error:', error);
+            setError(error.message);
+        } finally {
+            // Always reset the flag when done
+            initializationInProgress.current = false;
+        }
+    };
 
     useEffect(() => {
-        // Clear all stored TTS data on app initialization
-        clearStoredData();
-        
-        const checkDocker = async () => {
-            try {
-                // Check if Docker is installed and running
-                const dockerStatus = await window.electronAPI.checkDocker();
-                
-                if (!dockerStatus.installed) {
-                    setStatus('installing');
-                    // Attempt to install Docker
-                    await window.electronAPI.installDocker();
-                    // Recheck Docker status after installation
-                    const newStatus = await window.electronAPI.checkDocker();
-                    
-                    if (!newStatus.installed || !newStatus.running) {
-                        throw new Error('Docker installation failed or Docker is not running');
-                    }
-                } else if (!dockerStatus.running) {
-                    setStatus('starting');
-                    // Wait for Docker to start
-                    const retryCheck = await window.electronAPI.checkDocker();
-                    if (!retryCheck.running) {
-                        throw new Error('Docker is installed but not running');
-                    }
-                }
-
-                // Check if model container is ready
-                setStatus('preparing');
-                await window.electronAPI.checkModelContainer();
-
-                // Show success state briefly before completing
-                setShowSuccess(true);
-                setTimeout(() => {
-                    setFadeOut(true);
-                    setTimeout(() => {
-                        if (onInitializationComplete) {
-                            onInitializationComplete();
-                        }
-                    }, 500);
-                }, 1000);
-
-            } catch (error) {
-                console.error('Initialization error:', error);
-                setError(error.message);
-            }
-        };
-
+        // Only run this effect once
         checkDocker();
-    }, [onInitializationComplete]);
+        
+        // Empty dependency array ensures this runs only once on mount
+    }, []);
+
+    // Add password dialog handler
+    useEffect(() => {
+        // Set up listener for password requests
+        window.electronAPI.handleSudoPassword(() => {
+            setShowPasswordDialog(true);
+        });
+        
+        // Clean up listener
+        return () => {
+            // If you have a way to remove listeners, use it here
+        };
+    }, []);
+    
+    // Handle password submission
+    const handlePasswordSubmit = (password) => {
+        window.electronAPI.submitSudoPassword(password);
+        setShowPasswordDialog(false);
+    };
+    
+    // Handle password dialog cancellation
+    const handlePasswordCancel = () => {
+        window.electronAPI.submitSudoPassword(null); // Indicate cancellation
+        setShowPasswordDialog(false);
+    };
 
     const getStatusMessage = () => {
         switch (status) {
@@ -127,6 +172,13 @@ const InitializationPage = ({ onInitializationComplete }) => {
                     </div>
                 )}
             </div>
+            
+            {/* Add password dialog */}
+            <PasswordDialog 
+                isOpen={showPasswordDialog}
+                onSubmit={handlePasswordSubmit}
+                onCancel={handlePasswordCancel}
+            />
         </div>
     );
 };

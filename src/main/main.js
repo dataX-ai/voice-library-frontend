@@ -226,7 +226,13 @@ app.whenReady().then(() => {
   setupIpcHandlers();
   
   // Then create window
-  createWindow();
+  const mainWindow = createWindow();
+
+  // Make ipcMain available globally for the Docker manager
+  global.ipcMain = ipcMain;
+
+  // Store main window reference globally
+  global.mainWindow = mainWindow;
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

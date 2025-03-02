@@ -6,18 +6,19 @@ if [ -f "/etc/profile" ]; then
     source /etc/profile
 fi
 
-# Source user's profile and zshrc (macOS default shell is zsh)
-if [ -f "$HOME/.zprofile" ]; then
-    source "$HOME/.zprofile"
-fi
+CURRENT_SHELL=$(basename "$SHELL")
 
-if [ -f "$HOME/.zshrc" ]; then
+if [ "$CURRENT_SHELL" = "zsh" ]; then
+    # Source zsh profiles without executing zsh-specific code
     source "$HOME/.zshrc"
+else
+    # Source bash profiles
+   source "$HOME/.bashrc"
 fi
 
 # Debug: Try to find docker
 DOCKER_PATH=$(command -v docker)
-
+echo "DOCKER_PATH $DOCKER_PATH"
 # Check if docker command is available
 if [ -z "$DOCKER_PATH" ]; then
     echo "NOT INSTALLED"
