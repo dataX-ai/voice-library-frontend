@@ -111,12 +111,12 @@ download_package() {
     
     # Get the latest release URL dynamically from GitHub API
     echo "Fetching latest release information..."
-    LATEST_URL=$(curl -s https://api.github.com/repos/psarathi012/voice-library-frontend/releases/latest | grep "browser_download_url.*deb" | cut -d : -f 2,3 | tr -d \")
+    LATEST_URL=$(curl -sL https://api.github.com/repos/psarathi012/voice-library-frontend/releases/latest | grep "browser_download_url.*deb" | cut -d : -f 2,3 | tr -d \")
     
     if [ -z "$LATEST_URL" ]; then
         echo -e "${RED}${BOLD}Error:${RESET} Could not determine latest release URL."
         echo "Falling back to hardcoded release..."
-        LATEST_URL="https://github.com/psarathi012/voice-library-frontend/releases/latest/download/voice-studio-app_1.0.0_amd64.deb"
+        LATEST_URL="https://github.com/dataX-ai/voice-library-frontend/releases/download/v1.0.0/voice-studio-app_1.0.0_amd64.deb"
     fi
     
     # Temporary file for the downloaded package
