@@ -245,6 +245,7 @@ class DockerManager {
             }
 
             const docker = new Docker();
+            console.log("Docker Image: " + CONFIG.DOCKER_IMAGE);
             const imageHash = await this.getImageHash(CONFIG.DOCKER_IMAGE);
             const containerName = `voice-studio-models-${imageHash}`;
             console.log('Checking for existing containers...');

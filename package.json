@@ -11,8 +11,7 @@
     "make:mac": "env-cmd -f .env electron-forge make --platform=darwin --arch=arm64",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
-    "setup": "node src/main/installers/setup.js",
-    "publish:launchpad": "node scripts/publish-launchpad.js"
+    "setup": "node src/main/installers/setup.js"
   },
   "keywords": [],
   "author": "Kanishka",
