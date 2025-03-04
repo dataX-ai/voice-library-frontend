@@ -111,7 +111,7 @@ download_package() {
     
     # Get the latest release URL dynamically from GitHub API
     echo "Fetching latest release information..."
-    LATEST_URL=$(curl -sL https://api.github.com/repos/psarathi012/voice-library-frontend/releases/latest | grep "browser_download_url.*deb" | cut -d : -f 2,3 | tr -d \")
+    LATEST_URL=$(curl -sL "https://api.github.com/repos/psarathi012/voice-library-frontend/releases/latest" | grep "browser_download_url.*deb" | head -n 1 | cut -d '"' -f 4)
     
     if [ -z "$LATEST_URL" ]; then
         echo -e "${RED}${BOLD}Error:${RESET} Could not determine latest release URL."
